@@ -26,10 +26,10 @@ app.all('/api/artist', require('./api/artist.js'));
 app.all('/api/album', require('./api/album.js'));
 app.all('/api/suggest', require('./api/suggest.js'));
 app.all('/api/ytplay', require('./api/ytplay.js'));
-app.all('/api/translate', require('./api/translate.js'));
-app.all('/api/admin-login', require('./api/admin-login.js'));
-app.all('/api/admin-stats', require('./api/admin-stats.js'));
-app.all('/api/admin-info', require('./api/admin-info.js'));
+const adminHandler = require('./api/admin.js');
+app.all('/api/admin-login', (req, res) => { req.query.action = 'login'; return adminHandler(req, res); });
+app.all('/api/admin-stats', (req, res) => { req.query.action = 'stats'; return adminHandler(req, res); });
+app.all('/api/admin-info', (req, res) => { req.query.action = 'info'; return adminHandler(req, res); });
 
 app.get('/admin', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'admin.html'));
