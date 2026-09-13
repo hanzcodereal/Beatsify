@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#000000">
+    <title>Beatsify Admin</title>
+    <link rel="icon" type="image/png" href="/logo.png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        * { -webkit-tap-highlight-color: transparent; }
+        html, body { background: #000000; color: #fff; min-height: 100vh; }
+        .glass {
+            background: #000000;
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+        .glass-input {
+            background: #000000;
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 0.75rem;
+        }
+        .btn-chrome {
+            background: #000000;
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 0.75rem;
+            transition: all 0.2s;
+        }
+        .btn-chrome:hover { transform: scale(1.02); }
+        .btn-chrome:active { transform: scale(0.98); }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="font-sans">
+    <div id="admin-root" class="max-w-2xl mx-auto px-4 py-10"></div>
+    <script src="/config.js?v=1"></script>
+    <script src="/supabaseClient.js?v=1"></script>
+    <script src="/admin.js?v=1"></script>
+</body>
+                                           </html>
