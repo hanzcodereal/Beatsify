@@ -1,4 +1,4 @@
-// Sistem login Beatsify (Supabase Auth: email/password + Google)
+// Sistem login Beatsify (Supabase Auth: email, username & password)
 var Auth = {
     user: null,
     profile: null,
@@ -53,24 +53,32 @@ var Auth = {
         var email = (gid('auth-email').value || '').trim();
         var password = gid('auth-password').value || '';
         if (!email || !password) { showToast('Isi email dan password'); return; }
+        if (!/^[^\s@]+@gmail\.com$/i.test(email)) { showToast('Email harus menggunakan @gmail.com'); return; }
         var btn = gid('auth-submit-btn'); if (btn) btn.disabled = true;
         try {
             var { error } = await sb.auth.signInWithPassword({ email: email, password: password });
-            if (error) { showToast(error.message); return; }
+            if (error) { showToast(error.message === 'Invalid login credentials' ? 'Email atau password salah' : error.message); return; }
             showToast('Berhasil masuk!');
         } catch (e) { showToast('Gagal masuk: ' + e.message); }
         finally { if (btn) btn.disabled = false; }
     },
 
     async signUpEmail() {
+        var username = (gid('auth-username').value || '').trim();
         var email = (gid('auth-email').value || '').trim();
         var password = gid('auth-password').value || '';
-        if (!email || !password) { showToast('Isi email dan password'); return; }
+        if (!username || !email || !password) { showToast('Isi username, email, dan password'); return; }
+        if (!/^[^\s@]+@gmail\.com$/i.test(email)) { showToast('Email harus menggunakan @gmail.com'); return; }
         if (password.length < 6) { showToast('Password minimal 6 karakter'); return; }
         var btn = gid('auth-submit-btn'); if (btn) btn.disabled = true;
         try {
             var { data, error } = await sb.auth.signUp({ email: email, password: password });
             if (error) { showToast(error.message); return; }
+            if (data && data.user) {
+                try {
+                    await sb.from('profiles').upsert({ id: data.user.id, email: email, username: username });
+                } catch (e) { console.error('Gagal menyimpan username:', e); }
+            }
             if (data && data.session) {
                 showToast('Akun berhasil dibuat, langsung masuk!');
             } else {
@@ -78,12 +86,6 @@ var Auth = {
             }
         } catch (e) { showToast('Gagal daftar: ' + e.message); }
         finally { if (btn) btn.disabled = false; }
-    },
-
-    async signInGoogle() {
-        try {
-            await sb.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.origin } });
-        } catch (e) { showToast('Gagal login Google: ' + e.message); }
     },
 
     async signOut() {
@@ -142,7 +144,7 @@ var Auth = {
             el.innerHTML = `
             <div class="glass-strong rounded-2xl p-5 flex flex-col items-center gap-4">
                 <div class="relative">
-                    <img id="profile-avatar-img" src="${es(p.avatar_url) || FI}" class="w-24 h-24 rounded-full object-cover border-2 border-white/20 bg-black" onerror="this.src='${FI}'"/>
+                    <img id="profile-avatar-img" src="${es(p.avatar_url) || '/logo.png'}" class="w-24 h-24 rounded-full object-cover border-2 border-white/20 bg-black" onerror="this.src='/logo.png'"/>
                     <button onclick="document.getElementById('profile-avatar-input').click()" class="absolute -bottom-1 -right-1 btn-chrome rounded-full p-2 active:scale-90">
                         <i data-lucide="camera" class="w-4 h-4"></i>
                     </button>
@@ -172,9 +174,14 @@ var Auth = {
                     <button onclick="Auth.setAuthTab('signup')" class="flex-1 py-2 rounded-xl font-bold text-xs ${!isSignin ? 'btn-chrome text-white' : 'text-white/50'}">Daftar</button>
                 </div>
                 <div class="space-y-3 text-left">
+                    ${!isSignin ? `
+                    <div>
+                        <label class="text-white/50 text-xs uppercase tracking-wider">Username</label>
+                        <input id="auth-username" type="text" placeholder="Nama tampilan kamu" class="glass-input w-full px-3 py-2.5 mt-1.5 text-sm text-white rounded-lg outline-none" />
+                    </div>` : ''}
                     <div>
                         <label class="text-white/50 text-xs uppercase tracking-wider">Email</label>
-                        <input id="auth-email" type="email" placeholder="nama@email.com" class="glass-input w-full px-3 py-2.5 mt-1.5 text-sm text-white rounded-lg outline-none" />
+                        <input id="auth-email" type="email" placeholder="nama@gmail.com" class="glass-input w-full px-3 py-2.5 mt-1.5 text-sm text-white rounded-lg outline-none" />
                     </div>
                     <div>
                         <label class="text-white/50 text-xs uppercase tracking-wider">Password</label>
@@ -183,14 +190,7 @@ var Auth = {
                     <button id="auth-submit-btn" onclick="${isSignin ? 'Auth.signInEmail()' : 'Auth.signUpEmail()'}" class="w-full btn-chrome font-bold py-3 rounded-full active:scale-95 transition-all">
                         ${isSignin ? 'Masuk' : 'Buat Akun'}
                     </button>
-                    <div class="flex items-center gap-3 py-1">
-                        <div class="flex-1 h-px bg-white/10"></div>
-                        <span class="text-white/40 text-[11px]">atau</span>
-                        <div class="flex-1 h-px bg-white/10"></div>
-                    </div>
-                    <button onclick="Auth.signInGoogle()" class="w-full glass glass-hover font-bold py-3 rounded-full active:scale-95 transition-all flex items-center justify-center gap-2 text-sm">
-                        <i data-lucide="chrome" class="w-4 h-4"></i> Lanjutkan dengan Google
-                    </button>
+                    ${isSignin ? `<p class="text-center text-white/40 text-xs">Belum punya akun? <button onclick="Auth.setAuthTab('signup')" class="text-white font-bold underline">Daftar dulu</button></p>` : ''}
                 </div>
             </div>`;
         }
