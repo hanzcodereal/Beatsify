@@ -1,5 +1,5 @@
 {
   "username": "admin",
-  "password": "beatsify-admin-2026",
+  "password": "beatsify-admin",
   "jwtSecret": "beatsify-CHANGE-THIS-SECRET-3f9a7c1e"
 }

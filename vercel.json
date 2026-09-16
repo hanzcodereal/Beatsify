@@ -1,0 +1,8 @@
+{
+  "version": 2,
+  "rewrites": [
+    { "source": "/api/admin-login", "destination": "/api/admin?action=login" },
+    { "source": "/api/admin-stats", "destination": "/api/admin?action=stats" },
+    { "source": "/api/admin-info", "destination": "/api/admin?action=info" }
+  ]
+}
