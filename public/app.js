@@ -45,7 +45,7 @@ var App={
             </div>
 
             <div class="glass rounded-2xl p-5 max-w-sm mx-auto space-y-4 text-left mb-6">
-                <h3 class="text-white font-bold text-sm uppercase tracking-wider mb-2 border-b border-white/10 pb-2 flex items-center gap-2">
+                <h3 class="text-white font-bold text-sm uppercase tracking-wider mb-2 border-b border-[#333333] pb-2 flex items-center gap-2">
                     Developer
                 </h3>
                 <div class="flex justify-between items-center">
@@ -157,7 +157,7 @@ var App={
         if(typeof updateOG==='function') updateOG(title, cover, artist);
         var popup=document.createElement('div');popup.className='fixed inset-0 z-[300] flex items-end justify-center bg-black/60';
         popup.onclick=function(e){if(e.target===popup)popup.remove();};
-        popup.innerHTML='<div class="glass-strong w-full max-w-md rounded-t-3xl p-6 border-t border-white/10" style="animation:slideUp 0.4s ease-out forwards;"><div class="w-10 h-1 bg-white/20 rounded-full mx-auto mb-4"></div><div class="flex items-center gap-4 mb-4"><img src="'+cover+'" class="w-16 h-16 rounded-xl object-cover " onerror="this.src=\''+FI+'\'" /><div class="flex-1 truncate"><h3 class="font-bold text-white truncate">'+title+'</h3><p class="text-[#b3b3b3] text-sm truncate">'+artist+'</p></div></div><p class="text-white/70 text-xs mb-4 text-center">Seseorang membagikan lagu ini kepadamu</p><div class="flex gap-3"><button id="popup-play" class="flex-1 btn-chrome font-bold py-3 rounded-full active:scale-95">🎵 Putar Sekarang</button><button id="popup-later" class="px-6 py-3 glass glass-hover text-white rounded-full active:scale-95">Nanti</button></div></div>';
+        popup.innerHTML='<div class="glass-strong w-full max-w-md rounded-t-3xl p-6 border-t border-[#333333]" style="animation:slideUp 0.4s ease-out forwards;"><div class="w-10 h-1 bg-white/20 rounded-full mx-auto mb-4"></div><div class="flex items-center gap-4 mb-4"><img src="'+cover+'" class="w-16 h-16 rounded-xl object-cover " onerror="this.src=\''+FI+'\'" /><div class="flex-1 truncate"><h3 class="font-bold text-white truncate">'+title+'</h3><p class="text-[#b3b3b3] text-sm truncate">'+artist+'</p></div></div><p class="text-white/70 text-xs mb-4 text-center">Seseorang membagikan lagu ini kepadamu</p><div class="flex gap-3"><button id="popup-play" class="flex-1 btn-chrome font-bold py-3 rounded-full active:scale-95">🎵 Putar Sekarang</button><button id="popup-later" class="px-6 py-3 glass glass-hover text-white rounded-full active:scale-95">Nanti</button></div></div>';
         document.body.appendChild(popup);
         popup.querySelector('#popup-play').onclick=function(){popup.remove();S.ct={id:videoId,videoId:videoId,title:title,artist:artist,cover:cover,artistId:'',ytUrl:'https://youtube.com/watch?v='+videoId};S.ps='direct';S.pl=[S.ct];S.pi=0;UU();MP.show();resetLyricsUI(videoId);setTimeout(function(){FullPlayer.open();loadTrack(S.ct);},400);};
         popup.querySelector('#popup-later').onclick=function(){popup.remove();};
@@ -219,7 +219,7 @@ var App={
 
             if(isCurrent){
                 if(wrapper){
-                    wrapper.className = 'nav-icon-wrapper w-11 h-11 rounded-full flex items-center justify-center text-white btn-chrome  shadow-white/30 border-2 border-white/30 scale-110 transition-all duration-300';
+                    wrapper.className = 'nav-icon-wrapper w-11 h-11 rounded-full flex items-center justify-center text-white btn-chrome  shadow-white/30 border-2 border-[#3f3f3f] scale-110 transition-all duration-300';
                 }
                 if(label){
                     label.className = 'nav-label text-[11px] font-black text-white tracking-wider chrome-text transition-all duration-300';
@@ -281,7 +281,7 @@ var Library={
             '<div class="flex items-center justify-between mb-4">' +
                 '<h1 class="text-3xl font-black chrome-text">Library</h1>' +
             '</div>' +
-            '<div class="flex gap-1 p-1 bg-white/5 rounded-2xl mb-5 border border-white/5">' +
+            '<div class="flex gap-1 p-1 bg-white/5 rounded-2xl mb-5 border border-[#2a2a2a]">' +
                 '<button onclick="Library.setTab(\'liked\')" class="flex-1 py-2.5 px-2 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all ' + (isLikedTab ? 'btn-chrome text-white ' : 'text-[#a0a5b0] hover:text-white') + '">' +
                     '<i data-lucide="heart" class="w-3.5 h-3.5 ' + (isLikedTab ? 'fill-current text-rose-400' : '') + '"></i>' +
                     '<span>Disukai</span>' +
@@ -302,7 +302,7 @@ var Library={
 
         if(isLikedTab){
             if(likedSongs.length === 0){
-                html += '<div class="text-center text-white/70 py-16 px-4 glass rounded-3xl border border-white/5 mt-2">' +
+                html += '<div class="text-center text-white/70 py-16 px-4 glass rounded-3xl border border-[#2a2a2a] mt-2">' +
                     '<div class="w-20 h-20 mx-auto mb-4 rounded-full bg-rose-500/10 flex items-center justify-center border border-rose-500/20">' +
                         '<i data-lucide="heart" class="w-10 h-10 text-rose-400 opacity-60"></i>' +
                     '</div>' +
@@ -311,7 +311,7 @@ var Library={
                     '<button onclick="App.switch(\'search\')" class="btn-chrome px-6 py-3 font-bold rounded-full text-xs active:scale-95">Cari & Temukan Lagu</button>' +
                 '</div>';
             } else {
-                html += '<div class="relative overflow-hidden rounded-2xl p-5 mb-5 bg-gradient-to-r from-rose-600/30 via-purple-600/20 to-indigo-600/10 border border-white/10 flex items-center justify-between">' +
+                html += '<div class="relative overflow-hidden rounded-2xl p-5 mb-5 bg-gradient-to-r from-rose-600/30 via-purple-600/20 to-indigo-600/10 border border-[#333333] flex items-center justify-between">' +
                     '<div class="flex items-center gap-4 min-w-0">' +
                         '<div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-rose-500 to-rose-600 flex items-center justify-center flex-shrink-0">' +
                             '<i data-lucide="heart" class="w-7 h-7 text-white fill-white"></i>' +
@@ -347,7 +347,7 @@ var Library={
                         iconOverlay = '<i data-lucide="play" class="w-5 h-5 text-white fill-white"></i>';
                     }
 
-                    var rowBg = isPlay ? 'bg-gradient-to-r from-rose-500/20 via-rose-500/10 to-transparent border border-rose-500/30 shadow-md' : (isCur ? 'bg-white/10 border border-white/20' : 'hover:bg-white/5 border border-transparent hover:border-white/5');
+                    var rowBg = isPlay ? 'bg-gradient-to-r from-rose-500/20 via-rose-500/10 to-transparent border border-rose-500/30 shadow-md' : (isCur ? 'bg-white/10 border border-[#3a3a3a]' : 'hover:bg-white/5 border border-transparent hover:border-[#2a2a2a]');
                     var titleClass = isCur ? 'text-rose-400 font-bold' : 'text-white font-bold';
 
                     html += '<div class="flex items-center gap-3 p-2.5 rounded-2xl active:scale-[0.99] transition-all group ' + rowBg + '">' +
@@ -376,7 +376,7 @@ var Library={
             }
         } else if (isArtistsTab) {
             if(likedArtists.length === 0){
-                html += '<div class="text-center text-white/70 py-16 px-4 glass rounded-3xl border border-white/5 mt-2">' +
+                html += '<div class="text-center text-white/70 py-16 px-4 glass rounded-3xl border border-[#2a2a2a] mt-2">' +
                     '<div class="w-20 h-20 mx-auto mb-4 rounded-full bg-amber-500/10 flex items-center justify-center border border-amber-500/20">' +
                         '<i data-lucide="user" class="w-10 h-10 text-amber-400 opacity-60"></i>' +
                     '</div>' +
@@ -388,7 +388,7 @@ var Library={
                 html += '<div class="grid grid-cols-2 gap-3">';
                 likedArtists.forEach(function(a){
                     html += '<div onclick="Artist.open(\'' + es(a.artistId) + '\', \'' + esJs(a.name) + '\')" class="glass glass-hover rounded-2xl p-4 cursor-pointer active:scale-95 transition-all text-center flex flex-col items-center justify-center">' +
-                        '<div class="relative w-24 h-24 mb-3 rounded-full overflow-hidden border-2 border-white/10">' +
+                        '<div class="relative w-24 h-24 mb-3 rounded-full overflow-hidden border-2 border-[#333333]">' +
                             '<img src="' + a.thumbnail + '" class="w-full h-full object-cover" onerror="this.src=\'' + FI + '\'" />' +
                         '</div>' +
                         '<h3 class="font-bold text-sm truncate text-white w-full">' + es(a.name) + '</h3>' +
@@ -401,7 +401,7 @@ var Library={
             html += '<button onclick="Library.createNew()" class="w-full btn-chrome font-bold py-3.5 rounded-2xl active:scale-95 mb-5 flex items-center justify-center gap-2 ">+ Buat Playlist Baru</button>';
             
             if(pls.length === 0){
-                html += '<div class="text-center text-white/70 py-16 px-4 glass rounded-3xl border border-white/5 mt-2">' +
+                html += '<div class="text-center text-white/70 py-16 px-4 glass rounded-3xl border border-[#2a2a2a] mt-2">' +
                     '<i data-lucide="list-music" class="w-16 h-16 mx-auto mb-4 opacity-30 text-white"></i>' +
                     '<h3 class="text-white font-bold text-lg mb-1">Belum Ada Playlist</h3>' +
                     '<p class="text-xs text-white/70 max-w-xs mx-auto mb-5">Buat playlist pertamamu dan kumpulkan lagu-lagu favoritmu di satu tempat.</p>' +
@@ -423,7 +423,7 @@ var Library={
             }
         } else if (isHistoryTab) {
             if(history.length === 0){
-                html += '<div class="text-center text-white/70 py-16 px-4 glass rounded-3xl border border-white/5 mt-2">' +
+                html += '<div class="text-center text-white/70 py-16 px-4 glass rounded-3xl border border-[#2a2a2a] mt-2">' +
                     '<div class="w-20 h-20 mx-auto mb-4 rounded-full bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20">' +
                         '<i data-lucide="history" class="w-10 h-10 text-emerald-400 opacity-60"></i>' +
                     '</div>' +
@@ -432,7 +432,7 @@ var Library={
                     '<button onclick="App.switch(\'search\')" class="btn-chrome px-6 py-3 font-bold rounded-full text-xs active:scale-95">Cari & Temukan Lagu</button>' +
                 '</div>';
             } else {
-                html += '<div class="relative overflow-hidden rounded-2xl p-5 mb-5 bg-gradient-to-r from-emerald-600/30 via-teal-600/20 to-indigo-600/10 border border-white/10 flex items-center justify-between">' +
+                html += '<div class="relative overflow-hidden rounded-2xl p-5 mb-5 bg-gradient-to-r from-emerald-600/30 via-teal-600/20 to-indigo-600/10 border border-[#333333] flex items-center justify-between">' +
                     '<div class="flex items-center gap-4 min-w-0">' +
                         '<div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-emerald-500 to-emerald-600 flex items-center justify-center flex-shrink-0">' +
                             '<i data-lucide="history" class="w-7 h-7 text-white"></i>' +
@@ -468,7 +468,7 @@ var Library={
                         iconOverlay = '<i data-lucide="play" class="w-5 h-5 text-white fill-white"></i>';
                     }
 
-                    var rowBg = isPlay ? 'bg-gradient-to-r from-emerald-500/20 via-emerald-500/10 to-transparent border border-emerald-500/30 shadow-md' : (isCur ? 'bg-white/10 border border-white/20' : 'hover:bg-white/5 border border-transparent hover:border-white/5');
+                    var rowBg = isPlay ? 'bg-gradient-to-r from-emerald-500/20 via-emerald-500/10 to-transparent border border-emerald-500/30 shadow-md' : (isCur ? 'bg-white/10 border border-[#3a3a3a]' : 'hover:bg-white/5 border border-transparent hover:border-[#2a2a2a]');
                     var titleClass = isCur ? 'text-emerald-400 font-bold' : 'text-white font-bold';
 
                     html += '<div class="flex items-center gap-3 p-2.5 rounded-2xl active:scale-[0.99] transition-all group ' + rowBg + '">' +
@@ -547,12 +547,12 @@ var Library={
     confirmClearHistory(){
         var popup=document.createElement('div');popup.className='fixed inset-0 z-[300] flex items-end justify-center bg-black/60';
         popup.onclick=function(e){if(e.target===popup)popup.remove();};
-        popup.innerHTML='<div class="glass-strong w-full max-w-md rounded-t-3xl p-6 border-t border-white/10" style="animation:slideUp 0.3s ease-out forwards;"><div class="w-10 h-1 bg-white/20 rounded-full mx-auto mb-4"></div><h3 class="font-bold text-white mb-2">Hapus Semua Riwayat?</h3><p class="text-white/70 text-sm mb-5">Semua riwayat lagu yang diputar akan dihapus permanen dan tidak bisa dikembalikan.</p><div class="flex gap-3"><button onclick="clearPlayHistory();this.closest(\'.fixed\').remove();showToast(\'Riwayat dihapus\')" class="flex-1 bg-red-500 hover:bg-red-600 text-white font-bold py-3 rounded-full active:scale-95">Hapus</button><button onclick="this.closest(\'.fixed\').remove()" class="px-6 py-3 glass glass-hover text-white rounded-full">Batal</button></div></div>';
+        popup.innerHTML='<div class="glass-strong w-full max-w-md rounded-t-3xl p-6 border-t border-[#333333]" style="animation:slideUp 0.3s ease-out forwards;"><div class="w-10 h-1 bg-white/20 rounded-full mx-auto mb-4"></div><h3 class="font-bold text-white mb-2">Hapus Semua Riwayat?</h3><p class="text-white/70 text-sm mb-5">Semua riwayat lagu yang diputar akan dihapus permanen dan tidak bisa dikembalikan.</p><div class="flex gap-3"><button onclick="clearPlayHistory();this.closest(\'.fixed\').remove();showToast(\'Riwayat dihapus\')" class="flex-1 bg-red-500 hover:bg-red-600 text-white font-bold py-3 rounded-full active:scale-95">Hapus</button><button onclick="this.closest(\'.fixed\').remove()" class="px-6 py-3 glass glass-hover text-white rounded-full">Batal</button></div></div>';
         document.body.appendChild(popup);
     },
     createNew(){
         var popup=document.createElement('div');popup.className='fixed inset-0 z-[300] flex items-end justify-center bg-black/60';
-        popup.innerHTML='<div class="glass-strong w-full max-w-md rounded-t-3xl p-6 border-t border-white/10" style="animation:slideUp 0.3s ease-out forwards;"><div class="w-10 h-1 bg-white/20 rounded-full mx-auto mb-4"></div><h3 class="font-bold text-white mb-4">Buat Playlist Baru</h3><input id="pl-name" class="w-full glass-input text-white rounded-xl px-4 py-3 mb-3 focus:outline-none" placeholder="Nama Playlist" /><input id="pl-image" type="file" accept="image/*" class="w-full text-sm text-white/70 mb-4" /><div class="flex gap-3"><button id="pl-create" class="flex-1 btn-chrome font-bold py-3 rounded-full">Buat</button><button onclick="this.closest(\'.fixed\').remove()" class="px-6 py-3 glass glass-hover text-white rounded-full">Batal</button></div></div>';
+        popup.innerHTML='<div class="glass-strong w-full max-w-md rounded-t-3xl p-6 border-t border-[#333333]" style="animation:slideUp 0.3s ease-out forwards;"><div class="w-10 h-1 bg-white/20 rounded-full mx-auto mb-4"></div><h3 class="font-bold text-white mb-4">Buat Playlist Baru</h3><input id="pl-name" class="w-full glass-input text-white rounded-xl px-4 py-3 mb-3 focus:outline-none" placeholder="Nama Playlist" /><input id="pl-image" type="file" accept="image/*" class="w-full text-sm text-white/70 mb-4" /><div class="flex gap-3"><button id="pl-create" class="flex-1 btn-chrome font-bold py-3 rounded-full">Buat</button><button onclick="this.closest(\'.fixed\').remove()" class="px-6 py-3 glass glass-hover text-white rounded-full">Batal</button></div></div>';
         document.body.appendChild(popup);
         popup.querySelector('#pl-create').onclick=function(){
             var name=gid('pl-name').value.trim()||'Playlist Baru';
@@ -565,7 +565,7 @@ var Library={
         var pls=getUserPlaylists();var pl=pls.find(function(p){return p.id===id;});if(!pl)return;
         var popup=document.createElement('div');popup.className='fixed inset-0 z-[300] flex items-end justify-center bg-black/60';
         popup.onclick=function(e){if(e.target===popup)popup.remove();};
-        popup.innerHTML='<div class="w-full max-w-md rounded-t-3xl p-6 border-t border-white/10 glass-strong" style="animation:slideUp 0.3s ease-out forwards; background: var(--bg-color);">'+
+        popup.innerHTML='<div class="w-full max-w-md rounded-t-3xl p-6 border-t border-[#333333] glass-strong" style="animation:slideUp 0.3s ease-out forwards; background: var(--bg-color);">'+
             '<div class="w-10 h-1 bg-white/20 rounded-full mx-auto mb-4"></div>'+
             '<div class="flex items-center gap-3 mb-5"><img src="'+(pl.image||(pl.songs.length>0?pl.songs[0].cover:FI))+'" class="w-12 h-12 rounded-lg object-cover" onerror="this.src=\''+FI+'\'" /><div class="truncate"><h3 class="font-bold text-white truncate">'+es(pl.name)+'</h3><p class="text-white/70 text-xs">'+pl.songs.length+' lagu</p></div></div>'+
             '<button onclick="this.closest(\'.fixed\').remove();Library.editPlaylist(\''+id+'\')" class="w-full text-left p-4 rounded-xl hover:bg-white/5 flex items-center gap-3 mb-1"><i data-lucide="pencil" class="w-5 h-5 text-white"></i><span class="font-medium text-white">Edit Playlist</span></button>'+
@@ -576,7 +576,7 @@ var Library={
     editPlaylist(id){
         var pls=getUserPlaylists();var pl=pls.find(function(p){return p.id===id;});if(!pl)return;
         var popup=document.createElement('div');popup.className='fixed inset-0 z-[300] flex items-end justify-center bg-black/60';
-        popup.innerHTML='<div class="glass-strong w-full max-w-md rounded-t-3xl p-6 border-t border-white/10" style="animation:slideUp 0.3s ease-out forwards;"><div class="w-10 h-1 bg-white/20 rounded-full mx-auto mb-4"></div><h3 class="font-bold text-white mb-4">Edit Playlist</h3><input id="pl-edit-name" class="w-full glass-input text-white rounded-xl px-4 py-3 mb-3 focus:outline-none" placeholder="Nama Playlist" value="'+es(pl.name).replace(/"/g,'&quot;')+'" /><input id="pl-edit-image" type="file" accept="image/*" class="w-full text-sm text-white/70 mb-4" /><div class="flex gap-3"><button id="pl-edit-save" class="flex-1 btn-chrome font-bold py-3 rounded-full">Simpan</button><button onclick="this.closest(\'.fixed\').remove()" class="px-6 py-3 glass glass-hover text-white rounded-full">Batal</button></div></div>';
+        popup.innerHTML='<div class="glass-strong w-full max-w-md rounded-t-3xl p-6 border-t border-[#333333]" style="animation:slideUp 0.3s ease-out forwards;"><div class="w-10 h-1 bg-white/20 rounded-full mx-auto mb-4"></div><h3 class="font-bold text-white mb-4">Edit Playlist</h3><input id="pl-edit-name" class="w-full glass-input text-white rounded-xl px-4 py-3 mb-3 focus:outline-none" placeholder="Nama Playlist" value="'+es(pl.name).replace(/"/g,'&quot;')+'" /><input id="pl-edit-image" type="file" accept="image/*" class="w-full text-sm text-white/70 mb-4" /><div class="flex gap-3"><button id="pl-edit-save" class="flex-1 btn-chrome font-bold py-3 rounded-full">Simpan</button><button onclick="this.closest(\'.fixed\').remove()" class="px-6 py-3 glass glass-hover text-white rounded-full">Batal</button></div></div>';
         document.body.appendChild(popup);
         popup.querySelector('#pl-edit-save').onclick=function(){
             var name=gid('pl-edit-name').value.trim()||pl.name;
@@ -588,7 +588,7 @@ var Library={
     confirmDelete(id){
         var pls=getUserPlaylists();var pl=pls.find(function(p){return p.id===id;});if(!pl)return;
         var popup=document.createElement('div');popup.className='fixed inset-0 z-[300] flex items-end justify-center bg-black/60';
-        popup.innerHTML='<div class="glass-strong w-full max-w-md rounded-t-3xl p-6 border-t border-white/10" style="animation:slideUp 0.3s ease-out forwards;"><div class="w-10 h-1 bg-white/20 rounded-full mx-auto mb-4"></div><h3 class="font-bold text-white mb-2">Hapus "'+es(pl.name)+'"?</h3><p class="text-white/70 text-sm mb-5">Playlist ini akan dihapus permanen dan tidak bisa dikembalikan.</p><div class="flex gap-3"><button onclick="deleteUserPlaylist(\''+id+'\');this.closest(\'.fixed\').remove();Library.render();Library.close();showToast(\'Playlist dihapus\')" class="flex-1 bg-red-500 hover:bg-red-600 text-white font-bold py-3 rounded-full active:scale-95">Hapus</button><button onclick="this.closest(\'.fixed\').remove()" class="px-6 py-3 glass glass-hover text-white rounded-full">Batal</button></div></div>';
+        popup.innerHTML='<div class="glass-strong w-full max-w-md rounded-t-3xl p-6 border-t border-[#333333]" style="animation:slideUp 0.3s ease-out forwards;"><div class="w-10 h-1 bg-white/20 rounded-full mx-auto mb-4"></div><h3 class="font-bold text-white mb-2">Hapus "'+es(pl.name)+'"?</h3><p class="text-white/70 text-sm mb-5">Playlist ini akan dihapus permanen dan tidak bisa dikembalikan.</p><div class="flex gap-3"><button onclick="deleteUserPlaylist(\''+id+'\');this.closest(\'.fixed\').remove();Library.render();Library.close();showToast(\'Playlist dihapus\')" class="flex-1 bg-red-500 hover:bg-red-600 text-white font-bold py-3 rounded-full active:scale-95">Hapus</button><button onclick="this.closest(\'.fixed\').remove()" class="px-6 py-3 glass glass-hover text-white rounded-full">Batal</button></div></div>';
         document.body.appendChild(popup);
     },
     handleScroll(){
@@ -630,7 +630,7 @@ var Library={
                     <img src="${pl.image||(pl.songs.length>0?pl.songs[0].cover:FI)}" class="w-full h-full object-cover" onerror="this.src='${FI}'" />
                     <div class="absolute inset-0 bg-gradient-to-t from-[#000000] via-[#000000]/60 to-transparent"></div>
                     <div class="absolute bottom-6 left-6 right-6 flex flex-col justify-end items-center text-center z-10">
-                        <img src="${pl.image||(pl.songs.length>0?pl.songs[0].cover:FI)}" class="w-32 h-32 md:w-48 md:h-48 rounded-xl object-cover border border-white/10 mb-4" onerror="this.src='${FI}'" />
+                        <img src="${pl.image||(pl.songs.length>0?pl.songs[0].cover:FI)}" class="w-32 h-32 md:w-48 md:h-48 rounded-xl object-cover border border-[#333333] mb-4" onerror="this.src='${FI}'" />
                         <div>
                             <p class="text-[10px] font-bold text-white uppercase tracking-[0.2em] mb-1">PLAYLIST LOKAL</p>
                             <h1 class="text-3xl md:text-5xl font-black text-white mb-2 leading-tight drop- line-clamp-2">${es(pl.name)}</h1>
@@ -666,7 +666,7 @@ var Library={
                     iconOverlay = '<i data-lucide="play" class="w-4 h-4 text-white fill-white"></i>';
                 }
 
-                var rowBg = isPlay ? 'bg-gradient-to-r from-rose-500/20 via-rose-500/10 to-transparent border border-rose-500/30 shadow-md' : (isCur ? 'bg-white/10 border border-white/20' : 'hover:bg-white/5 border border-transparent');
+                var rowBg = isPlay ? 'bg-gradient-to-r from-rose-500/20 via-rose-500/10 to-transparent border border-rose-500/30 shadow-md' : (isCur ? 'bg-white/10 border border-[#3a3a3a]' : 'hover:bg-white/5 border border-transparent');
                 var titleClass = isCur ? 'text-rose-400 font-bold' : 'text-white font-medium';
 
                 html+='<div class="flex items-center gap-2 p-2 rounded-lg active:scale-[0.98] ' + rowBg + '"><div onclick="Library.playSong(\''+id+'\','+i+')" class="flex items-center gap-3 flex-1 cursor-pointer overflow-hidden"><div class="relative w-10 h-10 rounded overflow-hidden shrink-0"><img src="'+s.cover+'" class="w-full h-full object-cover" onerror="this.src=\'' + FI + '\'" /><div class="absolute inset-0 bg-black/80 ' + (isCur ? 'opacity-100' : 'opacity-0 group-hover:opacity-100') + ' transition-all flex items-center justify-center">' + iconOverlay + '</div></div><div class="truncate flex-1 min-w-0"><p class="text-sm truncate ' + titleClass + '">'+es(s.title)+'</p><p class="text-white/70 text-xs truncate">'+es(s.artist)+'</p></div></div><button onclick="Library.removeSong(\''+id+'\','+i+')" class="text-white/70 hover:text-red-400 p-2 active:scale-90 shrink-0" title="Hapus"><i data-lucide="x" class="w-5 h-5"></i></button></div>';
@@ -728,7 +728,7 @@ var Library={
                 coverOverlay.className = 'absolute inset-0 bg-black/80 ' + (isCur ? 'opacity-100' : 'opacity-0 group-hover:opacity-100') + ' transition-all flex items-center justify-center';
             }
 
-            var rowBg = isPlay ? 'bg-gradient-to-r from-rose-500/20 via-rose-500/10 to-transparent border border-rose-500/30 shadow-md' : (isCur ? 'bg-white/10 border border-white/20' : 'hover:bg-white/5 border border-transparent');
+            var rowBg = isPlay ? 'bg-gradient-to-r from-rose-500/20 via-rose-500/10 to-transparent border border-rose-500/30 shadow-md' : (isCur ? 'bg-white/10 border border-[#3a3a3a]' : 'hover:bg-white/5 border border-transparent');
             el.className = 'flex items-center gap-2 p-2 rounded-lg active:scale-[0.98] ' + rowBg;
 
             var titleEl = el.querySelector('p');

@@ -10,7 +10,7 @@ var Info = {
         modal.className = 'fixed inset-0 z-[300] flex items-end justify-center bg-black/60';
         modal.onclick = function (e) { if (e.target === modal) modal.remove(); };
         modal.innerHTML =
-            '<div class="glass-strong w-full max-w-md rounded-t-3xl p-6 border-t border-white/10 max-h-[75vh] overflow-y-auto hide-scrollbar" style="animation:slideUp 0.4s ease-out forwards;">' +
+            '<div class="glass-strong w-full max-w-md rounded-t-3xl p-6 border-t border-[#333333] max-h-[75vh] overflow-y-auto hide-scrollbar" style="animation:slideUp 0.4s ease-out forwards;">' +
                 '<div class="w-10 h-1 bg-white/20 rounded-full mx-auto mb-4"></div>' +
                 '<h3 class="text-lg font-black chrome-text mb-4 flex items-center gap-2"><i data-lucide="megaphone" class="w-5 h-5"></i> Informasi</h3>' +
                 '<div id="info-list-body" class="space-y-3 text-left"><p class="text-white/50 text-sm text-center py-6">Memuat informasi...</p></div>' +

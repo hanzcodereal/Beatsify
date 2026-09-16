@@ -62,7 +62,7 @@ var Artist={
                 var html = '';
                 
                 var isLiked = typeof isArtistLiked === 'function' ? isArtistLiked(id) : false;
-                var likeBtnClass = isLiked ? 'text-white border-white/60 bg-white/20' : 'text-white border-white/20 hover:bg-white/10';
+                var likeBtnClass = isLiked ? 'text-white border-[#5a5a5a] bg-white/20' : 'text-white border-[#3a3a3a] hover:bg-white/10';
                 var likeIconClass = isLiked ? 'fill-current' : '';
                 var likeText = isLiked ? 'Disukai' : 'Sukai';
 
@@ -113,7 +113,7 @@ var Artist={
                             btnIcon = '<i data-lucide="play" class="w-5 h-5 text-white/70 group-hover:text-white fill-current"></i>';
                         }
 
-                        var rowBg = isPlay ? 'bg-white/15 border border-white/30 shadow-md' : (isCur ? 'bg-white/10 border border-white/20' : 'hover:bg-white/5 border border-transparent');
+                        var rowBg = isPlay ? 'bg-white/15 border border-[#3f3f3f] shadow-md' : (isCur ? 'bg-white/10 border border-[#3a3a3a]' : 'hover:bg-white/5 border border-transparent');
                         var titleClass = isCur ? 'text-white font-bold' : 'text-white/90 font-medium';
 
                         html+=`
@@ -299,7 +299,7 @@ var Artist={
             var btnDiv = el.children[3];
             if (btnDiv) btnDiv.innerHTML = btnIcon;
 
-            var rowBg = isPlay ? 'bg-white/15 border border-white/30 shadow-md' : (isCur ? 'bg-white/10 border border-white/20' : 'hover:bg-white/5 border border-transparent');
+            var rowBg = isPlay ? 'bg-white/15 border border-[#3f3f3f] shadow-md' : (isCur ? 'bg-white/10 border border-[#3a3a3a]' : 'hover:bg-white/5 border border-transparent');
             el.className = 'flex items-center gap-3 p-3 rounded-xl cursor-pointer active:scale-[0.98] transition-all group ' + rowBg;
 
             var titleEl = el.querySelector('p');
@@ -321,10 +321,10 @@ var Artist={
         var isLiked = typeof isArtistLiked === 'function' ? isArtistLiked(Artist.currentArtistId) : false;
         
         if (isLiked) {
-            btn.className = 'mt-3 px-6 py-2 rounded-full border text-xs font-bold flex items-center justify-center gap-2 transition-all active:scale-95 text-white border-white/60 bg-white/20';
+            btn.className = 'mt-3 px-6 py-2 rounded-full border text-xs font-bold flex items-center justify-center gap-2 transition-all active:scale-95 text-white border-[#5a5a5a] bg-white/20';
             btn.innerHTML = '<i data-lucide="user-check" class="w-4 h-4 fill-current"></i> <span id="artist-like-text">Disukai</span>';
         } else {
-            btn.className = 'mt-3 px-6 py-2 rounded-full border text-xs font-bold flex items-center justify-center gap-2 transition-all active:scale-95 text-white border-white/20 hover:bg-white/10';
+            btn.className = 'mt-3 px-6 py-2 rounded-full border text-xs font-bold flex items-center justify-center gap-2 transition-all active:scale-95 text-white border-[#3a3a3a] hover:bg-white/10';
             btn.innerHTML = '<i data-lucide="user-check" class="w-4 h-4"></i> <span id="artist-like-text">Sukai</span>';
         }
         if(typeof lucide !== 'undefined' && lucide.createIcons) lucide.createIcons();

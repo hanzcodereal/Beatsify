@@ -1,9 +1,9 @@
 var Search={
     render(){
         gid('view-search').innerHTML=`
-        <div class="pt-12 px-4"><h1 class="text-3xl font-black chrome-text mb-4">Cari</h1><form id="search-form" class="relative" autocomplete="off"><div class="absolute inset-y-0 left-0 pl-4 flex items-center text-[#a0a5b0]"><i data-lucide="search" class="h-5 w-5"></i></div><input type="text" id="search-input" class="w-full glass-input text-white font-medium rounded-2xl pl-12 pr-20 py-3.5 focus:outline-none placeholder:text-[#a0a5b0]" placeholder="Cari lagu, artis, atau album..." autocomplete="off" /><button type="submit" class="absolute right-2 top-0 bottom-0 my-auto h-fit btn-chrome font-bold px-4 py-2 rounded-xl active:scale-90 shadow-md">Cari</button></form><div id="suggestions" class="hidden mt-2 glass-strong rounded-2xl  max-h-72 overflow-y-auto hide-scrollbar border border-white/10"></div></div>
-        <div id="filter-tabs" class="hidden flex gap-2 p-1.5 glass rounded-full mx-4 mb-3 mt-4 border border-white/10">
-            <button onclick="setFilter('songs')" id="f-songs" class="filter-tab active flex-1 py-2 px-4 rounded-full text-xs font-bold btn-chrome text-white  border border-white/30">Musik</button>
+        <div class="pt-12 px-4"><h1 class="text-3xl font-black chrome-text mb-4">Cari</h1><form id="search-form" class="relative" autocomplete="off"><div class="absolute inset-y-0 left-0 pl-4 flex items-center text-[#a0a5b0]"><i data-lucide="search" class="h-5 w-5"></i></div><input type="text" id="search-input" class="w-full glass-input text-white font-medium rounded-2xl pl-12 pr-20 py-3.5 focus:outline-none placeholder:text-[#a0a5b0]" placeholder="Cari lagu, artis, atau album..." autocomplete="off" /><button type="submit" class="absolute right-2 top-0 bottom-0 my-auto h-fit btn-chrome font-bold px-4 py-2 rounded-xl active:scale-90 shadow-md">Cari</button></form><div id="suggestions" class="hidden mt-2 glass-strong rounded-2xl  max-h-72 overflow-y-auto hide-scrollbar border border-[#333333]"></div></div>
+        <div id="filter-tabs" class="hidden flex gap-2 p-1.5 glass rounded-full mx-4 mb-3 mt-4 border border-[#333333]">
+            <button onclick="setFilter('songs')" id="f-songs" class="filter-tab active flex-1 py-2 px-4 rounded-full text-xs font-bold btn-chrome text-white  border border-[#3f3f3f]">Musik</button>
             <button onclick="setFilter('playlists')" id="f-playlists" class="filter-tab flex-1 py-2 px-4 rounded-full text-xs font-semibold text-[#a0a5b0] hover:text-white transition-all">Playlist</button>
             <button onclick="setFilter('artists')" id="f-artists" class="filter-tab flex-1 py-2 px-4 rounded-full text-xs font-semibold text-[#a0a5b0] hover:text-white transition-all">Artis</button>
         </div>
@@ -102,9 +102,9 @@ var Search={
                     btnHtml = '<div class="w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center shrink-0 text-white/70 transition-all"><i data-lucide="play" class="w-3.5 h-3.5 fill-current ml-0.5"></i></div>';
                 }
 
-                var itemBg = isCur ? (isPlay ? 'bg-white/15 border border-white/40  shadow-white/5' : 'bg-white/10 border border-white/20') : 'hover:bg-white/5 border border-transparent';
+                var itemBg = isCur ? (isPlay ? 'bg-white/15 border border-[#4a4a4a]  shadow-white/5' : 'bg-white/10 border border-[#3a3a3a]') : 'hover:bg-white/5 border border-transparent';
                 var titleColor = isCur ? 'text-white font-black' : 'text-white';
-                var badgeHtml = isPlay ? '<span class="text-[9px] px-1.5 py-0.5 rounded bg-white/20 text-white font-bold uppercase tracking-wider ml-2 border border-white/30">Diputar</span>' : (isCur ? '<span class="text-[9px] px-1.5 py-0.5 rounded bg-white/10 text-white/80 font-bold uppercase tracking-wider ml-2 border border-white/20">Dijeda</span>' : '');
+                var badgeHtml = isPlay ? '<span class="text-[9px] px-1.5 py-0.5 rounded bg-white/20 text-white font-bold uppercase tracking-wider ml-2 border border-[#3f3f3f]">Diputar</span>' : (isCur ? '<span class="text-[9px] px-1.5 py-0.5 rounded bg-white/10 text-white/80 font-bold uppercase tracking-wider ml-2 border border-[#3a3a3a]">Dijeda</span>' : '');
 
                 el.className = 'search-song-item flex items-center gap-3.5 p-3 rounded-xl cursor-pointer active:scale-[0.98] transition-all ' + itemBg;
                 var titleEl = el.querySelector('.search-song-title');
@@ -205,7 +205,7 @@ var Search={
             el.className = 'filter-tab flex-1 py-2 px-4 rounded-full text-xs font-semibold text-[#a0a5b0] hover:text-white transition-all';
         });
         var a=gid('f-'+S.filter);
-        if(a){a.className = 'filter-tab active flex-1 py-2 px-4 rounded-full text-xs font-bold btn-chrome text-white  border border-white/30 scale-105';}
+        if(a){a.className = 'filter-tab active flex-1 py-2 px-4 rounded-full text-xs font-bold btn-chrome text-white  border border-[#3f3f3f] scale-105';}
     },
     show(loading){
         var c=gid('search-results'),rc=gid('search-recs');if(!c)return;
@@ -237,9 +237,9 @@ var Search={
                     btnHtml = '<div class="w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center shrink-0 text-white/70 transition-all"><i data-lucide="play" class="w-3.5 h-3.5 fill-current ml-0.5"></i></div>';
                 }
 
-                var itemBg = isCur ? (isPlay ? 'bg-white/15 border border-white/40  shadow-white/5' : 'bg-white/10 border border-white/20') : 'hover:bg-white/5 border border-transparent';
+                var itemBg = isCur ? (isPlay ? 'bg-white/15 border border-[#4a4a4a]  shadow-white/5' : 'bg-white/10 border border-[#3a3a3a]') : 'hover:bg-white/5 border border-transparent';
                 var titleColor = isCur ? 'text-white font-black' : 'text-white';
-                var badgeHtml = isPlay ? '<span class="text-[9px] px-1.5 py-0.5 rounded bg-white/20 text-white font-bold uppercase tracking-wider ml-2 border border-white/30">Diputar</span>' : (isCur ? '<span class="text-[9px] px-1.5 py-0.5 rounded bg-white/10 text-white/80 font-bold uppercase tracking-wider ml-2 border border-white/20">Dijeda</span>' : '');
+                var badgeHtml = isPlay ? '<span class="text-[9px] px-1.5 py-0.5 rounded bg-white/20 text-white font-bold uppercase tracking-wider ml-2 border border-[#3f3f3f]">Diputar</span>' : (isCur ? '<span class="text-[9px] px-1.5 py-0.5 rounded bg-white/10 text-white/80 font-bold uppercase tracking-wider ml-2 border border-[#3a3a3a]">Dijeda</span>' : '');
 
                 return '<div onclick="PK(\'search\','+i+')" class="search-song-item flex items-center gap-3.5 p-3 rounded-xl cursor-pointer active:scale-[0.98] transition-all animate-card-up '+itemBg+'" style="animation-delay:'+Math.min(i*35, 500)+'ms">'+
                     '<img src="'+t.cover+'" class="w-12 h-12 rounded-lg object-cover shadow-md shrink-0" onerror="this.src=\''+FI+'\'" />'+

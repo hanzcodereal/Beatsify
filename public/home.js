@@ -35,7 +35,7 @@ var Home = {
             var isActive = (Home.activeCategory === c.name) || (!Home.activeCategory && c.name === 'Semua');
             var btnStyle = isActive
                 ? 'bg-white text-black font-extrabold shadow-white/20 border border-white scale-105'
-                : 'glass text-[#a0a5b0] hover:text-white hover:bg-white/10 border border-white/5 font-medium';
+                : 'glass text-[#a0a5b0] hover:text-white hover:bg-white/10 border border-[#2a2a2a] font-medium';
             return '<button onclick="Home.selectCategory(\'' + c.name + '\')" class="home-chip-btn px-4 py-2 rounded-full text-xs whitespace-nowrap transition-all duration-500 ease-out flex items-center gap-1.5 cursor-pointer shrink-0 ' + btnStyle + '">' +
                 (c.icon ? '<i data-lucide="' + c.icon + '" class="w-3.5 h-3.5"></i>' : '') +
                 '<span>' + es(c.name) + '</span>' +
@@ -43,7 +43,7 @@ var Home = {
         }).join('');
 
         gid('view-home').innerHTML = `
-        <div class="glass-pane border-b border-white/5 pt-12 pb-3 px-4 sticky top-0 z-20 bg-[#000000]/90">
+        <div class="glass-pane border-b border-[#2a2a2a] pt-12 pb-3 px-4 sticky top-0 z-20 bg-[#000000]/90">
             <div class="flex justify-between items-center mb-1">
                 <div>
                     <h1 class="text-2xl md:text-3xl font-black chrome-text">Beatsify</h1>
@@ -123,7 +123,7 @@ var Home = {
                     var isAct = (c && c.name === 'Semua');
                     btn.className = 'home-chip-btn px-4 py-2 rounded-full text-xs whitespace-nowrap transition-all duration-200 flex items-center gap-1.5 cursor-pointer shrink-0 ' + (isAct
                         ? 'bg-white text-black font-extrabold shadow-white/20 border border-white scale-105'
-                        : 'glass text-[#a0a5b0] hover:text-white hover:bg-white/10 border border-white/5 font-medium');
+                        : 'glass text-[#a0a5b0] hover:text-white hover:bg-white/10 border border-[#2a2a2a] font-medium');
                 });
             }
             var defView = gid('home-default-view'), catView = gid('home-category-view');
@@ -143,7 +143,7 @@ var Home = {
                 var isAct = (c && c.name === catName);
                 btn.className = 'home-chip-btn px-4 py-2 rounded-full text-xs whitespace-nowrap transition-all duration-200 flex items-center gap-1.5 cursor-pointer shrink-0 ' + (isAct
                     ? 'bg-white text-black font-extrabold shadow-white/20 border border-white scale-105'
-                    : 'glass text-[#a0a5b0] hover:text-white hover:bg-white/10 border border-white/5 font-medium');
+                    : 'glass text-[#a0a5b0] hover:text-white hover:bg-white/10 border border-[#2a2a2a] font-medium');
             });
         }
 
@@ -156,7 +156,7 @@ var Home = {
         if (catView) {
             catView.style.display = 'block';
             catView.innerHTML = `
-            <div class="mb-4 flex justify-between items-center bg-white/5 p-3.5 rounded-2xl border border-white/10 animate-pulse">
+            <div class="mb-4 flex justify-between items-center bg-white/5 p-3.5 rounded-2xl border border-[#333333] animate-pulse">
                 <div class="flex items-center gap-2">
                     <span class="text-xs text-[#a0a5b0]">Kategori:</span>
                     <span class="font-bold text-sm text-white">${es(catName)}</span>
@@ -243,7 +243,7 @@ var Home = {
                     playIconHtml = '<div class="w-7 h-7 rounded-full bg-white/5 group-hover:bg-white/20 flex items-center justify-center shrink-0 ml-auto text-white transition-all"><i data-lucide="play" class="w-3.5 h-3.5 fill-current ml-0.5"></i></div>';
                 }
 
-                var cardBg = isPlay ? 'bg-white/15 border border-white/40 shadow-white/5' : (isCur ? 'bg-white/10 border border-white/30' : 'glass glass-hover');
+                var cardBg = isPlay ? 'bg-white/15 border border-[#4a4a4a] shadow-white/5' : (isCur ? 'bg-white/10 border border-[#3f3f3f]' : 'glass glass-hover');
 
                 return '<div onclick="PK(\'homecat\','+i+')" class="home-cat-card group '+cardBg+' rounded-xl flex items-center gap-3 p-2.5 cursor-pointer active:scale-95 transition-all animate-card-up" style="animation-delay:'+Math.min(i*30, 450)+'ms">'+
                     '<img src="'+t.cover+'" class="w-12 h-12 rounded-lg object-cover shadow-md shrink-0" onerror="this.src=\''+FI+'\'" />'+
@@ -271,10 +271,10 @@ var Home = {
 
         catView.innerHTML = `
         <div class="space-y-6 pb-6 animate-card-up">
-            <div class="flex justify-between items-center bg-white/5 p-3.5 rounded-2xl border border-white/10">
+            <div class="flex justify-between items-center bg-white/5 p-3.5 rounded-2xl border border-[#333333]">
                 <div class="flex items-center gap-2">
                     <span class="text-xs text-[#a0a5b0]">Kategori:</span>
-                    <span class="font-bold text-sm text-white bg-white/10 px-3 py-1 rounded-full border border-white/20">${es(catName)}</span>
+                    <span class="font-bold text-sm text-white bg-white/10 px-3 py-1 rounded-full border border-[#3a3a3a]">${es(catName)}</span>
                 </div>
                 <button onclick="Home.selectCategory('Semua')" class="text-xs px-3.5 py-1.5 rounded-full btn-chrome text-white hover:text-white transition-all flex items-center gap-1 active:scale-95">
                     <i data-lucide="x" class="w-3.5 h-3.5"></i> Reset / Semua
@@ -415,7 +415,7 @@ var Home = {
                 playIconHtml = '<div class="w-7 h-7 rounded-full bg-white text-black flex items-center justify-center shrink-0 ml-auto border border-white"><i data-lucide="pause" class="w-3.5 h-3.5 fill-current"></i></div>';
             }
 
-            var cardBg = isPlay ? 'bg-white/15 border border-white/40 shadow-white/5' : (isCur ? 'bg-white/10 border border-white/30' : 'glass glass-hover');
+            var cardBg = isPlay ? 'bg-white/15 border border-[#4a4a4a] shadow-white/5' : (isCur ? 'bg-white/10 border border-[#3f3f3f]' : 'glass glass-hover');
             var textStyle = isCur ? 'text-white font-black' : '';
 
             return '<div onclick="PK(\'home1\','+i+')" class="home-grid-card '+cardBg+' rounded-xl flex items-center gap-3 p-2 cursor-pointer active:scale-95 transition-all animate-stagger" style="animation-delay:'+(i*50)+'ms">'+
@@ -432,7 +432,7 @@ var Home = {
             plHtml += '<div onclick="Library.open(\''+p.id+'\')" class="flex-shrink-0 w-40 cursor-pointer active:scale-95 animate-stagger" style="animation-delay:'+(i*50)+'ms"><div class="w-40 h-40 mb-2 relative rounded-xl overflow-hidden glass-edge"><img src="'+(p.image||(p.songs.length>0?p.songs[0].cover:FI))+'" class="w-full h-full object-cover" onerror="this.src=\''+FI+'\'" /><div class="absolute bottom-2 right-2 btn-chrome rounded-full p-3 opacity-0 hover:opacity-100 transition-all shadow-black/40"><i data-lucide="play" class="w-5 h-5 fill-current ml-0.5"></i></div></div><h3 class="font-semibold text-sm truncate">'+es(p.name)+'</h3><p class="text-white/70 text-xs truncate mt-1">'+p.songs.length+' lagu</p></div>';
         });
 
-        plHtml += '<div onclick="if(typeof Library !== \'undefined\') Library.createNew()" class="flex-shrink-0 w-40 cursor-pointer active:scale-95 flex flex-col"><div class="w-40 h-40 mb-2 relative rounded-xl overflow-hidden glass flex flex-col items-center justify-center border border-dashed border-white/20 hover:border-white/40"><i data-lucide="plus" class="w-8 h-8 text-white/70"></i><span class="text-xs text-white/70 mt-2">Buat Playlist</span></div><h3 class="font-semibold text-sm truncate text-white/70">Buat Baru</h3></div>';
+        plHtml += '<div onclick="if(typeof Library !== \'undefined\') Library.createNew()" class="flex-shrink-0 w-40 cursor-pointer active:scale-95 flex flex-col"><div class="w-40 h-40 mb-2 relative rounded-xl overflow-hidden glass flex flex-col items-center justify-center border border-dashed border-[#3a3a3a] hover:border-[#4a4a4a]"><i data-lucide="plus" class="w-8 h-8 text-white/70"></i><span class="text-xs text-white/70 mt-2">Buat Playlist</span></div><h3 class="font-semibold text-sm truncate text-white/70">Buat Baru</h3></div>';
 
         if (S.hp && S.hp.length > 0) {
             S.hp.slice(0, 8).forEach(function(p, i) {
@@ -489,7 +489,7 @@ var Home = {
                     playIconHtml = '<div class="w-7 h-7 rounded-full bg-white text-black flex items-center justify-center shrink-0 ml-auto border border-white"><i data-lucide="pause" class="w-3.5 h-3.5 fill-current"></i></div>';
                 }
 
-                var cardBg = isPlay ? 'bg-white/15 border border-white/40 shadow-white/5' : (isCur ? 'bg-white/10 border border-white/30' : 'glass glass-hover');
+                var cardBg = isPlay ? 'bg-white/15 border border-[#4a4a4a] shadow-white/5' : (isCur ? 'bg-white/10 border border-[#3f3f3f]' : 'glass glass-hover');
                 el.className = 'home-grid-card ' + cardBg + ' rounded-xl flex items-center gap-3 p-2 cursor-pointer active:scale-95 transition-all';
 
                 var titleEl = el.querySelector('.home-grid-title');
@@ -535,7 +535,7 @@ var Home = {
                 playIconHtml = '<div class="w-7 h-7 rounded-full bg-white/5 group-hover:bg-white/20 flex items-center justify-center shrink-0 ml-auto text-white transition-all"><i data-lucide="play" class="w-3.5 h-3.5 fill-current ml-0.5"></i></div>';
             }
 
-            var cardBg = isPlay ? 'bg-white/15 border border-white/40 shadow-white/5' : (isCur ? 'bg-white/10 border border-white/30' : 'glass glass-hover');
+            var cardBg = isPlay ? 'bg-white/15 border border-[#4a4a4a] shadow-white/5' : (isCur ? 'bg-white/10 border border-[#3f3f3f]' : 'glass glass-hover');
             el.className = 'home-cat-card group ' + cardBg + ' rounded-xl flex items-center gap-3 p-2.5 cursor-pointer active:scale-95 transition-all';
 
             var titleEl = el.querySelector('h3');

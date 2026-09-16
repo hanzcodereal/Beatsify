@@ -67,7 +67,7 @@ var Album = {
                 <div class="absolute inset-0 bg-gradient-to-t from-[#000000] via-[#000000]/60 to-transparent"></div>
                 
                 <div class="absolute bottom-6 left-6 right-6 flex flex-col justify-end items-center text-center z-10">
-                    <img src="${im}" class="w-32 h-32 md:w-48 md:h-48 rounded-xl  object-cover border border-white/10 mb-4" onerror="this.src='${FI}'" />
+                    <img src="${im}" class="w-32 h-32 md:w-48 md:h-48 rounded-xl  object-cover border border-[#333333] mb-4" onerror="this.src='${FI}'" />
                     <div>
                         <p class="text-[10px] font-bold text-white uppercase tracking-[0.2em] mb-1">ALBUM / PLAYLIST</p>
                         <h1 class="text-3xl md:text-5xl font-black text-white mb-2 leading-tight drop- line-clamp-2">${es(a.title)}</h1>
@@ -129,7 +129,7 @@ var Album = {
                         numHtml = (i + 1);
                     }
 
-                    var rowBg = isPlay ? 'bg-white/15 border border-white/30 shadow-md' : (isCur ? 'bg-white/10 border border-white/20' : 'hover:bg-white/5 border border-transparent');
+                    var rowBg = isPlay ? 'bg-white/15 border border-[#3f3f3f] shadow-md' : (isCur ? 'bg-white/10 border border-[#3a3a3a]' : 'hover:bg-white/5 border border-transparent');
                     var titleClass = isCur ? 'text-white font-bold' : 'text-white/90 font-medium';
 
                     html += `
@@ -194,7 +194,7 @@ var Album = {
             var numEl = el.children[0];
             if (numEl) numEl.innerHTML = numHtml;
 
-            var rowBg = isPlay ? 'bg-white/15 border border-white/30 shadow-md' : (isCur ? 'bg-white/10 border border-white/20' : 'hover:bg-white/5 border border-transparent');
+            var rowBg = isPlay ? 'bg-white/15 border border-[#3f3f3f] shadow-md' : (isCur ? 'bg-white/10 border border-[#3a3a3a]' : 'hover:bg-white/5 border border-transparent');
             el.className = 'flex items-center gap-3 p-3 rounded-xl cursor-pointer group active:scale-[0.98] transition-all ' + rowBg;
 
             var titleEl = el.querySelector('p');

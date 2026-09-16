@@ -20,7 +20,7 @@ var FullPlayer={
             </div>
 
             <div class="relative z-10 flex justify-center items-center my-1 flex-shrink-0">
-                <div class="inline-flex items-center bg-black/40 backdrop-blur-xl p-1 rounded-full border border-white/15 shadow-inner">
+                <div class="inline-flex items-center bg-black/40 backdrop-blur-xl p-1 rounded-full border border-[#383838] shadow-inner">
                     <button id="full-tab-cover" onclick="FullPlayer.switchView('cover')" class="px-4 py-1 rounded-full text-xs font-bold transition-all text-white bg-white/20 shadow-md cursor-pointer">
                         Cover
                     </button>
@@ -33,17 +33,17 @@ var FullPlayer={
             <div class="relative z-10 flex-1 flex items-center justify-center my-auto px-4 py-1" style="min-height:0;overflow:hidden;">
                 <div class="relative w-[86%] sm:w-[88%] max-w-[340px] aspect-square flex items-center justify-center">
                     <div id="full-cover-view" class="w-full h-full relative flex items-center justify-center">
-                        <img id="full-cover" src="" class="w-full h-full object-cover rounded-2xl transition-transform duration-300 border border-white/10 shadow-2xl" />
+                        <img id="full-cover" src="" class="w-full h-full object-cover rounded-2xl transition-transform duration-300 border border-[#333333] shadow-2xl" />
                         <div id="full-cover-overlay" class="absolute inset-0 rounded-2xl flex flex-col items-center justify-center bg-black/50 transition-opacity duration-200 opacity-0 pointer-events-none z-20">
                             <div id="full-cover-icon" class="mb-2 text-white flex items-center justify-center"></div>
                             <span id="full-cover-text" class="text-xs font-black text-white tracking-[0.2em] uppercase drop-shadow text-center px-4"></span>
                         </div>
                     </div>
 
-                    <div id="full-lyrics-view" class="hidden w-full h-full relative rounded-2xl bg-black/50 backdrop-blur-2xl border border-white/15 p-3.5 overflow-hidden flex flex-col shadow-2xl">
+                    <div id="full-lyrics-view" class="hidden w-full h-full relative rounded-2xl bg-black/50 backdrop-blur-2xl border border-[#383838] p-3.5 overflow-hidden flex flex-col shadow-2xl">
                         <div id="full-inline-lyrics-scroll" class="flex-1 w-full overflow-y-auto no-scrollbar scroll-smooth relative z-10" style="touch-action:pan-y;">
                             <div id="full-inline-lyrics-loading" class="hidden h-full flex flex-col items-center justify-center text-white/50 text-xs gap-2 py-8">
-                                <div class="w-6 h-6 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>
+                                <div class="w-6 h-6 border-2 border-[#3a3a3a] border-t-white rounded-full animate-spin"></div>
                                 <span>Memuat lirik...</span>
                             </div>
                             <div id="full-inline-lyrics-empty" class="hidden h-full flex flex-col items-center justify-center text-white/50 text-xs text-center py-8">
@@ -53,15 +53,15 @@ var FullPlayer={
                             <div id="full-inline-lyrics-content" class="min-h-full flex flex-col justify-center text-left"></div>
                         </div>
 
-                        <div class="relative z-20 shrink-0 pt-2 flex items-center justify-between border-t border-white/10 mt-1 gap-2">
-                            <div class="flex items-center gap-1.5 bg-white/10 rounded-full px-2.5 py-1 border border-white/10">
+                        <div class="relative z-20 shrink-0 pt-2 flex items-center justify-between border-t border-[#333333] mt-1 gap-2">
+                            <div class="flex items-center gap-1.5 bg-white/10 rounded-full px-2.5 py-1 border border-[#333333]">
                                 <span class="text-[10px] text-white/60 font-semibold mr-0.5">Sync</span>
                                 <button onclick="lyricSyncPrev()" class="w-5 h-5 rounded-full bg-white/15 hover:bg-white/30 text-white font-bold text-xs flex items-center justify-center active:scale-90 transition cursor-pointer" title="Lirik Mundur 1 Baris">-</button>
                                 <span id="full-inline-sync-badge" class="hidden text-[10px] font-bold text-rose-400"></span>
                                 <button onclick="lyricSyncNext()" class="w-5 h-5 rounded-full bg-white/15 hover:bg-white/30 text-white font-bold text-xs flex items-center justify-center active:scale-90 transition cursor-pointer" title="Lirik Maju 1 Baris">+</button>
                             </div>
 
-                            <button onclick="toggleLyrics()" class="px-3 py-1 rounded-full bg-white/15 hover:bg-white/25 active:scale-95 text-white text-[11px] font-bold border border-white/20 backdrop-blur-md flex items-center gap-1.5 transition-all shadow-md cursor-pointer" title="Buka Lirik Penuh">
+                            <button onclick="toggleLyrics()" class="px-3 py-1 rounded-full bg-white/15 hover:bg-white/25 active:scale-95 text-white text-[11px] font-bold border border-[#3a3a3a] backdrop-blur-md flex items-center gap-1.5 transition-all shadow-md cursor-pointer" title="Buka Lirik Penuh">
                                 <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>
                                 <span>Lirik Penuh</span>
                             </button>
@@ -75,11 +75,11 @@ var FullPlayer={
                     <div class="flex-1 min-w-0 truncate">
                         <div class="flex items-center gap-2">
                             <h2 id="full-title" class="text-xl sm:text-2xl font-black text-white truncate leading-tight">Pilih lagu</h2>
-                            <span id="full-status-tag" class="hidden px-2 py-0.5 rounded-full text-[9px] font-extrabold tracking-wider uppercase border border-white/20 text-white bg-white/10 shrink-0"></span>
+                            <span id="full-status-tag" class="hidden px-2 py-0.5 rounded-full text-[9px] font-extrabold tracking-wider uppercase border border-[#3a3a3a] text-white bg-white/10 shrink-0"></span>
                         </div>
                         <p id="full-artist" class="text-[#a0a5b0] text-xs sm:text-sm font-medium truncate cursor-pointer hover:text-white mt-1" onclick="FullPlayer.openArtist()"></p>
                     </div>
-                    <button id="full-like-btn" onclick="toggleCurrentLike(); if(typeof event !== 'undefined') event.stopPropagation();" class="w-11 h-11 rounded-full bg-white/10 hover:bg-white/20 border border-white/10 text-white flex items-center justify-center active:scale-90 transition-all shrink-0 cursor-pointer shadow-md" title="Sukai Lagu">
+                    <button id="full-like-btn" onclick="toggleCurrentLike(); if(typeof event !== 'undefined') event.stopPropagation();" class="w-11 h-11 rounded-full bg-white/10 hover:bg-white/20 border border-[#333333] text-white flex items-center justify-center active:scale-90 transition-all shrink-0 cursor-pointer shadow-md" title="Sukai Lagu">
                         <i data-lucide="heart" class="w-5 h-5"></i>
                     </button>
                 </div>
@@ -127,7 +127,7 @@ var FullPlayer={
                 <div class="player-bg-vignette"></div>
             </div>
 
-            <div class="md:hidden flex justify-between items-center p-4 pt-safe flex-shrink-0 bg-black/30 backdrop-blur-md border-b border-white/10 relative z-20">
+            <div class="md:hidden flex justify-between items-center p-4 pt-safe flex-shrink-0 bg-black/30 backdrop-blur-md border-b border-[#333333] relative z-20">
                 <div class="flex items-center gap-3 overflow-hidden">
                     <img id="lyrics-header-cover" src="" class="w-12 h-12 rounded-md object-cover shadow-md flex-shrink-0 bg-white/5" />
                     <div class="flex flex-col min-w-0">
@@ -138,7 +138,7 @@ var FullPlayer={
                 <button onclick="toggleLyrics()" class="text-white/70 hover:text-white p-2 rounded-full active:scale-90 flex-shrink-0 transition-all bg-white/10 ml-3"><i data-lucide="chevron-down" class="w-6 h-6"></i></button>
             </div>
 
-            <div class="md:hidden absolute top-[100px] right-6 z-30 flex items-center gap-2 bg-black/40 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/10">
+            <div class="md:hidden absolute top-[100px] right-6 z-30 flex items-center gap-2 bg-black/40 backdrop-blur-md px-3 py-1.5 rounded-full border border-[#333333]">
                 <button onclick="lyricSyncPrev()" class="text-white/70 hover:text-white bg-white/10 hover:bg-white/20 w-8 h-8 rounded-full active:scale-90 flex items-center justify-center transition-all"><i data-lucide="minus" class="w-4 h-4"></i></button>
                 <p id="lyric-sync-badge-mobile" class="hidden text-xs font-bold text-white tracking-wide">+0</p>
                 <button onclick="lyricSyncNext()" class="text-white/70 hover:text-white bg-white/10 hover:bg-white/20 w-8 h-8 rounded-full active:scale-90 flex items-center justify-center transition-all"><i data-lucide="plus" class="w-4 h-4"></i></button>
@@ -165,7 +165,7 @@ var FullPlayer={
                 </div>
 
                 <div class="hidden md:flex w-2/5 flex-col justify-center items-start p-12 z-10 pl-16">
-                    <img id="lyrics-desktop-cover" src="" class="w-[350px] max-w-full aspect-square rounded-2xl mb-8 object-cover bg-white/5 shadow-2xl border border-white/10" />
+                    <img id="lyrics-desktop-cover" src="" class="w-[350px] max-w-full aspect-square rounded-2xl mb-8 object-cover bg-white/5 shadow-2xl border border-[#333333]" />
                     <h2 id="lyrics-desktop-title" class="font-bold text-white text-3xl mb-2 line-clamp-2 leading-tight">Lirik</h2>
                     <p id="lyrics-desktop-artist" class="text-white/70 text-lg line-clamp-1"></p>
                     <div class="flex items-center justify-start gap-3 mt-8">
@@ -253,7 +253,7 @@ var FullPlayer={
         sheet.onclick = function(e) { if (e.target === sheet) sheet.remove(); };
 
         sheet.innerHTML = `
-        <div class="bg-[#181922] w-full max-w-md rounded-t-3xl p-6 border-t border-white/10" style="animation:slideUp 0.25s ease-out forwards;">
+        <div class="bg-[#181922] w-full max-w-md rounded-t-3xl p-6 border-t border-[#333333]" style="animation:slideUp 0.25s ease-out forwards;">
             <div class="w-10 h-1 bg-white/20 rounded-full mx-auto mb-5"></div>
 
             <div class="flex items-center gap-3 mb-6 p-3 rounded-2xl bg-white/5">
@@ -311,7 +311,7 @@ var FullPlayer={
                 </button>
             </div>
 
-            <button onclick="gid('full-more-sheet').remove()" class="w-full mt-2 py-3 bg-white/10 text-white font-bold rounded-full border border-white/10 active:scale-95 transition cursor-pointer">Tutup</button>
+            <button onclick="gid('full-more-sheet').remove()" class="w-full mt-2 py-3 bg-white/10 text-white font-bold rounded-full border border-[#333333] active:scale-95 transition cursor-pointer">Tutup</button>
         </div>`;
 
         document.body.appendChild(sheet);

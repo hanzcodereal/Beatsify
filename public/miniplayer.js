@@ -2,7 +2,7 @@ var MP={
     init(){
         gid('mini-container').innerHTML=`
         <div id="mini-player" class="hidden fixed left-3 right-3 sm:left-auto sm:right-6 sm:w-96 z-[160]" style="bottom:75px;transition:transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);transform:translateY(150px);">
-            <div id="mini-player-inner" onclick="FullPlayer.open()" class="rounded-full px-3 py-2 flex items-center gap-3 cursor-pointer active:scale-[0.98] transition-all relative overflow-hidden bg-[#12131b] border border-white/10 group">
+            <div id="mini-player-inner" onclick="FullPlayer.open()" class="rounded-full px-3 py-2 flex items-center gap-3 cursor-pointer active:scale-[0.98] transition-all relative overflow-hidden bg-[#12131b] border border-[#333333] group">
                 <div id="mini-beats-bg" class="absolute inset-0 pointer-events-none opacity-40 transition-opacity duration-500 overflow-hidden rounded-full z-0 hidden">
                     <div id="mini-beats-bg-gradient" class="absolute inset-0 transition-all duration-700"></div>
                 </div>
@@ -11,7 +11,7 @@ var MP={
                         <circle cx="24" cy="24" r="21" fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="2.5"></circle>
                         <circle id="mini-circle-progress" cx="24" cy="24" r="21" fill="none" stroke="#f43f5e" stroke-width="2.5" stroke-dasharray="131.95" stroke-dashoffset="131.95" stroke-linecap="round" class="transition-all duration-150"></circle>
                     </svg>
-                    <div class="w-[34px] h-[34px] rounded-full overflow-hidden z-0 border border-white/10">
+                    <div class="w-[34px] h-[34px] rounded-full overflow-hidden z-0 border border-[#333333]">
                         <img id="mini-cover" src="" class="w-full h-full object-cover rounded-full spin-record" style="animation-play-state: paused;" />
                     </div>
                 </div>
@@ -21,7 +21,7 @@ var MP={
                 </div>
                 <div class="flex items-center gap-1.5 z-10 shrink-0">
                     <button onclick="TP(); if(typeof event !== 'undefined') event.stopPropagation();" class="text-white active:scale-90 p-0.5 cursor-pointer" title="Putar/Jeda">
-                        <div id="mini-play-btn" class="w-9 h-9 rounded-full flex items-center justify-center transition-all bg-white/10 border border-white/20 hover:bg-white/20">
+                        <div id="mini-play-btn" class="w-9 h-9 rounded-full flex items-center justify-center transition-all bg-white/10 border border-[#3a3a3a] hover:bg-white/20">
                             <i data-lucide="play" class="w-4 h-4 fill-current ml-0.5"></i>
                         </div>
                     </button>

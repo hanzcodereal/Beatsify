@@ -96,7 +96,7 @@ function UB(){
         if(coverOverlay){
             coverOverlay.classList.remove('opacity-0', 'pointer-events-none');
             coverOverlay.classList.add('opacity-100');
-            if(coverIcon) coverIcon.innerHTML='<div class="w-12 h-12 border-4 border-white/30 border-t-white rounded-full animate-spin"></div>';
+            if(coverIcon) coverIcon.innerHTML='<div class="w-12 h-12 border-4 border-[#3f3f3f] border-t-white rounded-full animate-spin"></div>';
             if(coverText) coverText.innerText='MEMUAT AUDIO...';
         }
         if(fullCover){
@@ -104,8 +104,8 @@ function UB(){
             fullCover.style.filter='brightness(0.75)';
         }
         if(statusTag){
-            statusTag.classList.remove('hidden', 'bg-white/10', 'text-white/80', 'border-white/20');
-            statusTag.classList.add('inline-block', 'bg-white/20', 'text-white', 'border-white/30', 'animate-pulse');
+            statusTag.classList.remove('hidden', 'bg-white/10', 'text-white/80', 'border-[#3a3a3a]');
+            statusTag.classList.add('inline-block', 'bg-white/20', 'text-white', 'border-[#3f3f3f]', 'animate-pulse');
             statusTag.innerText='MEMUAT';
         }
     }
@@ -151,7 +151,7 @@ function UB(){
         if(statusTag){
             if(S.ct){
                 statusTag.classList.remove('hidden', 'bg-white/20', 'animate-pulse');
-                statusTag.classList.add('inline-block', 'bg-white/10', 'text-white/80', 'border-white/20');
+                statusTag.classList.add('inline-block', 'bg-white/10', 'text-white/80', 'border-[#3a3a3a]');
                 statusTag.innerText='PAUSED';
             }else{
                 statusTag.classList.add('hidden');
@@ -789,11 +789,11 @@ function updateLikeButtons(){
         if(isLiked){
             fullBtn.innerHTML = '<i data-lucide="heart" class="w-5 h-5 text-rose-500 fill-rose-500"></i>';
             fullBtn.classList.add('bg-rose-500/20', 'border-rose-500/40');
-            fullBtn.classList.remove('bg-black/50', 'border-white/20');
+            fullBtn.classList.remove('bg-black/50', 'border-[#3a3a3a]');
         } else {
             fullBtn.innerHTML = '<i data-lucide="heart" class="w-5 h-5 text-white"></i>';
             fullBtn.classList.remove('bg-rose-500/20', 'border-rose-500/40');
-            fullBtn.classList.add('bg-black/50', 'border-white/20');
+            fullBtn.classList.add('bg-black/50', 'border-[#3a3a3a]');
         }
     }
     if(typeof lucide !== 'undefined' && lucide.createIcons) lucide.createIcons();
@@ -890,7 +890,7 @@ function deleteUserPlaylist(id){var pls=getUserPlaylists().filter(function(p){re
 function addToPlaylistById(playlistId,track){var pls=getUserPlaylists();var pl=pls.find(function(p){return p.id===playlistId;});if(!pl)return;if(pl.songs.length>=15){showToast('Playlist penuh (Max 15)');return;}var exists=pl.songs.find(function(s){return s.videoId===track.videoId;});if(!exists){pl.songs.push({id:track.id,videoId:track.videoId,title:track.title,artist:track.artist,cover:track.cover,artistId:track.artistId||'',ytUrl:track.ytUrl});if(!pl.image&&pl.songs.length===1){pl.image=track.cover;}saveUserPlaylists(pls);showToast('Ditambahkan ke '+pl.name);}else{showToast('Sudah ada di playlist');}}
 function showToast(msg){var toast=document.createElement('div');toast.className='fixed bottom-24 left-1/2 -translate-x-1/2 bg-white text-black font-bold px-5 py-2.5 rounded-full z-[999]';toast.style.animation='slideUp 0.3s ease-out forwards';toast.innerText=msg;document.body.appendChild(toast);setTimeout(function(){toast.remove();},2000);}
 function addCurrentToPlaylist(){if(!S.ct)return;var pls=getUserPlaylists();if(pls.length===0){showToast('Belum ada playlist! Buat di Library dulu');return;}showPlaylistPicker(S.ct);}
-function showPlaylistPicker(track){var pls=getUserPlaylists();var popup=document.createElement('div');popup.className='fixed inset-0 z-[300] flex items-end justify-center bg-black/60';popup.onclick=function(e){if(e.target===popup)popup.remove();};var listHtml=pls.map(function(p){return'<button onclick="addToPlaylistById(\''+p.id+'\',S.ct);this.parentElement.parentElement.remove();" class="w-full text-left p-4 hover:bg-white/5 flex items-center gap-3 border-b border-white/5"><img src="'+(p.image||(p.songs.length>0?p.songs[0].cover:FI))+'" class="w-10 h-10 rounded object-cover" /><div><p class="font-medium text-white">'+p.name+'</p><p class="text-[#6b7280] text-xs">'+p.songs.length+' lagu</p></div></button>';}).join('');popup.innerHTML='<div class="bg-[#1a1a1a] w-full max-w-md rounded-t-3xl p-6 border-t border-white/10" style="animation:slideUp 0.3s ease-out forwards;"><div class="w-10 h-1 bg-white/20 rounded-full mx-auto mb-4"></div><h3 class="font-bold text-white mb-3">Tambah ke Playlist</h3><div class="max-h-72 overflow-y-auto hide-scrollbar">'+listHtml+'</div><button onclick="this.parentElement.parentElement.remove()" class="w-full mt-3 py-3 border border-white/20 text-white rounded-full">Batal</button></div>';document.body.appendChild(popup);}
+function showPlaylistPicker(track){var pls=getUserPlaylists();var popup=document.createElement('div');popup.className='fixed inset-0 z-[300] flex items-end justify-center bg-black/60';popup.onclick=function(e){if(e.target===popup)popup.remove();};var listHtml=pls.map(function(p){return'<button onclick="addToPlaylistById(\''+p.id+'\',S.ct);this.parentElement.parentElement.remove();" class="w-full text-left p-4 hover:bg-white/5 flex items-center gap-3 border-b border-[#2a2a2a]"><img src="'+(p.image||(p.songs.length>0?p.songs[0].cover:FI))+'" class="w-10 h-10 rounded object-cover" /><div><p class="font-medium text-white">'+p.name+'</p><p class="text-[#6b7280] text-xs">'+p.songs.length+' lagu</p></div></button>';}).join('');popup.innerHTML='<div class="bg-[#1a1a1a] w-full max-w-md rounded-t-3xl p-6 border-t border-[#333333]" style="animation:slideUp 0.3s ease-out forwards;"><div class="w-10 h-1 bg-white/20 rounded-full mx-auto mb-4"></div><h3 class="font-bold text-white mb-3">Tambah ke Playlist</h3><div class="max-h-72 overflow-y-auto hide-scrollbar">'+listHtml+'</div><button onclick="this.parentElement.parentElement.remove()" class="w-full mt-3 py-3 border border-[#3a3a3a] text-white rounded-full">Batal</button></div>';document.body.appendChild(popup);}
 
 var audioCtx = null;
 var sourceNode = null;
@@ -1046,14 +1046,14 @@ function openSleepTimer() {
     } else {
         var options = [5, 10, 15, 30, 45, 60];
         var gridHtml = options.map(function(m) {
-            return '<button onclick="startSleepTimer(' + m + ')" class="py-3 px-4 rounded-2xl bg-white/5 border border-white/5 text-sm text-white font-medium hover:bg-white/10 active:scale-95 transition-all">' + m + ' Menit</button>';
+            return '<button onclick="startSleepTimer(' + m + ')" class="py-3 px-4 rounded-2xl bg-white/5 border border-[#2a2a2a] text-sm text-white font-medium hover:bg-white/10 active:scale-95 transition-all">' + m + ' Menit</button>';
         }).join('');
         contentHtml = '<div class="grid grid-cols-3 gap-3 mb-4">' + gridHtml + '</div>' +
-            '<button onclick="startSleepAtTrackEnd()" class="w-full py-3.5 px-4 rounded-2xl bg-[#cfd3d8]/10 hover:bg-[#cfd3d8]/20 border border-white/10 text-xs text-white font-bold active:scale-95 transition-all flex items-center justify-center gap-2">' +
+            '<button onclick="startSleepAtTrackEnd()" class="w-full py-3.5 px-4 rounded-2xl bg-[#cfd3d8]/10 hover:bg-[#cfd3d8]/20 border border-[#333333] text-xs text-white font-bold active:scale-95 transition-all flex items-center justify-center gap-2">' +
                 '<i data-lucide="music-4" class="w-4 h-4"></i> Hentikan di Akhir Lagu' +
             '</button>';
     }
-    popup.innerHTML = '<div class="w-full max-w-md rounded-t-3xl p-6 border-t border-white/10 glass-strong" style="animation:slideUp 0.3s ease-out forwards; background: var(--bg-color);">' +
+    popup.innerHTML = '<div class="w-full max-w-md rounded-t-3xl p-6 border-t border-[#333333] glass-strong" style="animation:slideUp 0.3s ease-out forwards; background: var(--bg-color);">' +
         '<div class="w-10 h-1 bg-white/20 rounded-full mx-auto mb-4"></div>' +
         '<div class="flex justify-between items-center mb-5">' +
             '<div>' +
@@ -1085,14 +1085,14 @@ function openPlaybackSpeed() {
         var isSelected = currentSpeed === sp;
         var btnStyle = isSelected 
             ? 'bg-[#cfd3d8] text-black font-bold border-[#cfd3d8]' 
-            : 'bg-white/5 hover:bg-white/10 text-white border-white/5';
+            : 'bg-white/5 hover:bg-white/10 text-white border-[#2a2a2a]';
         var label = sp === 1.0 ? '1.0x (Normal)' : sp + 'x';
         return '<button onclick="setPlaybackSpeed(' + sp + ')" class="w-full py-3.5 px-4 rounded-2xl border text-sm font-medium active:scale-98 transition-all flex items-center justify-between ' + btnStyle + '">' +
             '<span>' + label + '</span>' +
             (isSelected ? '<i data-lucide="check" class="w-4 h-4 text-black"></i>' : '') +
         '</button>';
     }).join('');
-    popup.innerHTML = '<div class="w-full max-w-md rounded-t-3xl p-6 border-t border-white/10 glass-strong" style="animation:slideUp 0.3s ease-out forwards; background: var(--bg-color); max-height: 80vh; overflow-y: auto;">' +
+    popup.innerHTML = '<div class="w-full max-w-md rounded-t-3xl p-6 border-t border-[#333333] glass-strong" style="animation:slideUp 0.3s ease-out forwards; background: var(--bg-color); max-height: 80vh; overflow-y: auto;">' +
         '<div class="w-10 h-1 bg-white/20 rounded-full mx-auto mb-4"></div>' +
         '<div class="flex justify-between items-center mb-5">' +
             '<div>' +
@@ -1146,7 +1146,7 @@ function openVolumeControl() {
     popup.className = 'fixed inset-0 z-[300] flex items-end justify-center bg-black/60';
     popup.onclick = function(e) { if(e.target === popup) closeVolumeControl(); };
     var vol = Math.round((AU.volume !== undefined ? AU.volume : 1) * 100);
-    popup.innerHTML = '<div class="w-full max-w-md rounded-t-3xl p-6 border-t border-white/10 glass-strong" style="animation:slideUp 0.3s ease-out forwards; background: var(--bg-color);">' +
+    popup.innerHTML = '<div class="w-full max-w-md rounded-t-3xl p-6 border-t border-[#333333] glass-strong" style="animation:slideUp 0.3s ease-out forwards; background: var(--bg-color);">' +
         '<div class="w-10 h-1 bg-white/20 rounded-full mx-auto mb-4"></div>' +
         '<div class="flex justify-between items-center mb-6">' +
             '<div>' +
@@ -1209,7 +1209,7 @@ function openEqualizer() {
         var btnStyle = act ? 'bg-[#cfd3d8]/20 text-white font-bold' : 'hover:bg-white/5 text-[#a0a5b0]';
         return '<button onclick="applyPreset(\'' + p + '\')" class="px-3.5 py-1.5 rounded-full text-xs transition-all ' + btnStyle + '">' + p + '</button>';
     }).join('');
-    popup.innerHTML = '<div class="w-full max-w-md rounded-t-3xl p-6 border-t border-white/10 glass-strong" style="animation:slideUp 0.3s ease-out forwards; background: var(--bg-color);">' +
+    popup.innerHTML = '<div class="w-full max-w-md rounded-t-3xl p-6 border-t border-[#333333] glass-strong" style="animation:slideUp 0.3s ease-out forwards; background: var(--bg-color);">' +
         '<div class="w-10 h-1 bg-white/20 rounded-full mx-auto mb-4"></div>' +
         '<div class="flex justify-between items-center mb-4">' +
             '<div>' +
@@ -1291,21 +1291,21 @@ function openShareCard() {
     popup.id = 'share-card-popup';
     popup.className = 'fixed inset-0 z-[300] flex items-center justify-center bg-black/75 px-4';
     popup.onclick = function(e) { if(e.target === popup) popup.remove(); };
-    popup.innerHTML = '<div class="w-full max-w-sm rounded-3xl p-6 border border-white/10 glass-strong text-center" style="animation:slideUp 0.3s ease-out forwards; background: var(--bg-color);">' +
+    popup.innerHTML = '<div class="w-full max-w-sm rounded-3xl p-6 border border-[#333333] glass-strong text-center" style="animation:slideUp 0.3s ease-out forwards; background: var(--bg-color);">' +
         '<div class="flex justify-between items-center mb-4">' +
             '<h3 class="font-bold text-lg text-white">Bagikan Lagu</h3>' +
             '<button onclick="document.getElementById(\'share-card-popup\').remove()" class="text-[#a0a5b0] hover:text-white p-1"><i data-lucide="x" class="w-5 h-5"></i></button>' +
         '</div>' +
         '<div id="share-card-preview" class="p-6 rounded-2xl mb-6 flex flex-col items-center gap-4 relative overflow-hidden" ' +
             'style="box-shadow: var(--nm-shadow-inset); background: var(--bg-color); border: 1px solid var(--border-color);">' +
-            '<img src="' + S.ct.cover + '" class="w-48 h-48 object-cover rounded-2xl border border-white/5" />' +
+            '<img src="' + S.ct.cover + '" class="w-48 h-48 object-cover rounded-2xl border border-[#2a2a2a]" />' +
             '<div class="w-full truncate">' +
                 '<p class="text-white font-black text-lg truncate">' + es(S.ct.title) + '</p>' +
                 '<p class="text-[#a0a5b0] text-xs font-bold mt-1 truncate">' + es(S.ct.artist) + '</p>' +
             '</div>' +
             '<div class="w-full h-1 bg-white/10 rounded-full mt-2 overflow-hidden"><div class="h-full bg-gradient-to-r from-gray-400 to-white w-2/3"></div></div>' +
             '<div class="flex justify-between w-full text-[9px] text-[#6b7280] font-mono mt-1"><span>1:48</span><span>2:56</span></div>' +
-            '<div class="border-t border-white/5 w-full pt-3 mt-1 flex items-center justify-center gap-1.5">' +
+            '<div class="border-t border-[#2a2a2a] w-full pt-3 mt-1 flex items-center justify-center gap-1.5">' +
                 '<i data-lucide="music" class="w-3.5 h-3.5 text-[#a0a5b0]"></i>' +
                 '<span class="text-[10px] text-[#6b7280] tracking-wider font-semibold uppercase">Beatsify Web App</span>' +
             '</div>' +
@@ -1458,7 +1458,7 @@ function openQueue(){
             '</div>';
         }).join('');
     }
-    popup.innerHTML='<div class="w-full max-w-md rounded-t-3xl p-6 border-t border-white/10 glass-strong" style="animation:slideUp 0.3s ease-out forwards; background: var(--bg-color); max-height:75vh; display:flex; flex-direction:column;">'+
+    popup.innerHTML='<div class="w-full max-w-md rounded-t-3xl p-6 border-t border-[#333333] glass-strong" style="animation:slideUp 0.3s ease-out forwards; background: var(--bg-color); max-height:75vh; display:flex; flex-direction:column;">'+
         '<div class="w-10 h-1 bg-white/20 rounded-full mx-auto mb-4 flex-shrink-0"></div>'+
         '<div class="flex justify-between items-center mb-4 flex-shrink-0">'+
             '<div><h3 class="font-black text-white text-lg">Daftar Antrian</h3><p class="text-[#6b7280] text-xs">'+(S.pl?S.pl.length:0)+' lagu dalam antrian</p></div>'+

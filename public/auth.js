@@ -30,7 +30,7 @@ var Auth = {
             try {
                 var { data: prof } = await sb.from('profiles').select('*').eq('id', Auth.user.id).maybeSingle();
                 if (!prof) {
-                    var defaultUsername = (Auth.user.email || 'user').split('@')[0];
+                    var defaultUsername = (Auth.user.user_metadata && Auth.user.user_metadata.username) || (Auth.user.email || 'user').split('@')[0];
                     var { data: created } = await sb.from('profiles').upsert({
                         id: Auth.user.id, email: Auth.user.email, username: defaultUsername
                     }).select().maybeSingle();
@@ -72,11 +72,17 @@ var Auth = {
         if (password.length < 6) { showToast('Password minimal 6 karakter'); return; }
         var btn = gid('auth-submit-btn'); if (btn) btn.disabled = true;
         try {
-            var { data, error } = await sb.auth.signUp({ email: email, password: password });
+            var { data, error } = await sb.auth.signUp({
+                email: email,
+                password: password,
+                options: { data: { username: username } }
+            });
             if (error) { showToast(error.message); return; }
             if (data && data.user) {
                 try {
                     await sb.from('profiles').upsert({ id: data.user.id, email: email, username: username });
+                    Auth.profile = Auth.profile || {};
+                    Auth.profile.username = username;
                 } catch (e) { console.error('Gagal menyimpan username:', e); }
             }
             if (data && data.session) {
@@ -144,7 +150,7 @@ var Auth = {
             el.innerHTML = `
             <div class="glass-strong rounded-2xl p-5 flex flex-col items-center gap-4">
                 <div class="relative">
-                    <img id="profile-avatar-img" src="${es(p.avatar_url) || '/logo.png'}" class="w-24 h-24 rounded-full object-cover border-2 border-white/20 bg-black" onerror="this.src='/logo.png'"/>
+                    <img id="profile-avatar-img" src="${es(p.avatar_url) || '/logo.png'}" class="w-24 h-24 rounded-full object-cover border-2 border-[#3a3a3a] bg-black" onerror="this.src='/logo.png'"/>
                     <button onclick="document.getElementById('profile-avatar-input').click()" class="absolute -bottom-1 -right-1 btn-chrome rounded-full p-2 active:scale-90">
                         <i data-lucide="camera" class="w-4 h-4"></i>
                     </button>
