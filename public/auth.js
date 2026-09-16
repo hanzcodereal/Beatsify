@@ -78,13 +78,6 @@ var Auth = {
                 options: { data: { username: username } }
             });
             if (error) { showToast(error.message); return; }
-            if (data && data.user) {
-                try {
-                    await sb.from('profiles').upsert({ id: data.user.id, email: email, username: username });
-                    Auth.profile = Auth.profile || {};
-                    Auth.profile.username = username;
-                } catch (e) { console.error('Gagal menyimpan username:', e); }
-            }
             if (data && data.session) {
                 showToast('Akun berhasil dibuat, langsung masuk!');
             } else {
