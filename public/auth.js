@@ -206,7 +206,7 @@ var Auth = {
                 <div class="space-y-3 text-left">
                     ${!isSignin ? `
                     <div>
-                        <label class="text-white/50 text-xs uppercase tracking-wider">Username buat di Beatsify</label>
+                        <label class="text-white/50 text-xs uppercase tracking-wider">Username akun di Beatsify</label>
                         <input id="auth-username" type="text" placeholder="Nama tampilan kamu" class="glass-input w-full px-3 py-2.5 mt-1.5 text-sm text-white rounded-lg outline-none" />
                     </div>` : ''}
                     <div>
@@ -214,7 +214,7 @@ var Auth = {
                         <input id="auth-email" type="email" placeholder="nama@gmail.com" class="glass-input w-full px-3 py-2.5 mt-1.5 text-sm text-white rounded-lg outline-none" />
                     </div>
                     <div>
-                        <label class="text-white/50 text-xs uppercase tracking-wider">Pasword buat di Beatsify</label>
+                        <label class="text-white/50 text-xs uppercase tracking-wider">Pasword akun di Beatsify</label>
                         <input id="auth-password" type="password" placeholder="••••••••" class="glass-input w-full px-3 py-2.5 mt-1.5 text-sm text-white rounded-lg outline-none" />
                     </div>
                     <button id="auth-submit-btn" onclick="${isSignin ? 'Auth.signInEmail()' : 'Auth.signUpEmail()'}" class="w-full btn-chrome font-bold py-3 rounded-full active:scale-95 transition-all">
