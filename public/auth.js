@@ -120,7 +120,8 @@ var Auth = {
 
     setAuthTab(tab) {
         Auth.authTab = tab;
-        Auth.renderProfile();
+        if (gid('profile-account-section')) Auth.renderProfile();
+        if (gid('auth-gate-form')) Auth.renderGate();
     },
 
     async saveUsername() {
