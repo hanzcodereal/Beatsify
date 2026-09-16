@@ -237,29 +237,34 @@ var App={
         gid('main-area').scrollTop=0;lucide.createIcons();
     }
 };
-App.init();Home.fetch();
+var _splashStartTime = Date.now();
+function startBeatsifyApp(){ App.init(); Home.fetch(); }
+window.startBeatsifyApp = startBeatsifyApp;
 
-(function(){
+function hideSplashScreen(){
     var sp=gid('splash-screen');
     if(!sp)return;
-    var logoWrap=sp.querySelector('.logo-wrap');
-    if(logoWrap){
-        logoWrap.style.width='200px';
-        logoWrap.style.height='200px';
-        logoWrap.style.borderRadius='50%';
-    }
-    var logo=sp.querySelector('.logo');
-    if(logo){
-        logo.style.borderRadius='50%';
-        logo.style.objectFit='cover';
-    }
+    var elapsed = Date.now() - _splashStartTime;
+    var minDelay = Math.max(0, 900 - elapsed);
     setTimeout(function(){
+        var logoWrap=sp.querySelector('.logo-wrap');
+        if(logoWrap){
+            logoWrap.style.width='200px';
+            logoWrap.style.height='200px';
+            logoWrap.style.borderRadius='50%';
+        }
+        var logo=sp.querySelector('.logo');
+        if(logo){
+            logo.style.borderRadius='50%';
+            logo.style.objectFit='cover';
+        }
         sp.classList.add('hide');
         setTimeout(function(){
             if(sp&&sp.parentNode) sp.parentNode.removeChild(sp);
         },350);
-    },2000);
-})();
+    }, minDelay);
+}
+window.hideSplashScreen = hideSplashScreen;
 
 var Library={
     activeTab: 'liked',

@@ -6,19 +6,33 @@ var Auth = {
     authTab: 'signin',
 
     async init() {
-        if (!window.sb) { console.error('Beatsify: Supabase client belum siap.'); return; }
+        if (!window.sb) {
+            console.error('Beatsify: Supabase client belum siap.');
+            if (typeof window.hideSplashScreen === 'function') window.hideSplashScreen();
+            var gate = gid('auth-gate');
+            var gateForm = gid('auth-gate-form');
+            if (gate) gate.style.display = 'flex';
+            if (gateForm) gateForm.innerHTML = '<div class="glass-strong rounded-2xl p-5 text-center"><p class="text-white font-bold mb-1">Gagal terhubung ke server</p><p class="text-white/50 text-xs">Cek koneksi internet kamu, lalu muat ulang halaman.</p></div>';
+            return;
+        }
         try {
             var { data } = await sb.auth.getSession();
             await Auth._applySession(data && data.session);
         } catch (e) { console.error(e); }
         Auth.ready = true;
+        Auth.syncGate();
 
         sb.auth.onAuthStateChange(function (event, session) {
+            if (event === 'SIGNED_OUT') {
+                if (typeof DataSync !== 'undefined') DataSync.onLogout();
+                location.reload();
+                return;
+            }
             Auth._applySession(session).then(function () {
+                Auth.syncGate();
                 if (S && S.at === 'profile') Auth.renderProfile();
                 if (typeof Home !== 'undefined' && Home.updateGreeting) Home.updateGreeting();
                 if (event === 'SIGNED_IN' && typeof DataSync !== 'undefined') DataSync.onLogin();
-                if (event === 'SIGNED_OUT' && typeof DataSync !== 'undefined') DataSync.onLogout();
             });
         });
     },
@@ -94,6 +108,16 @@ var Auth = {
         } catch (e) { showToast('Gagal keluar: ' + e.message); }
     },
 
+    maskEmail(email) {
+        if (!email || email.indexOf('@') === -1) return email || '';
+        var parts = email.split('@');
+        var name = parts[0];
+        var domain = parts[1];
+        var visible = name.slice(0, Math.min(3, name.length));
+        var masked = visible + '*'.repeat(Math.max(3, name.length - visible.length));
+        return masked + '@' + domain;
+    },
+
     setAuthTab(tab) {
         Auth.authTab = tab;
         Auth.renderProfile();
@@ -158,15 +182,21 @@ var Auth = {
                 </div>
                 <div class="w-full text-left">
                     <label class="text-white/50 text-xs uppercase tracking-wider">Email</label>
-                    <p class="text-white text-sm mt-1.5 truncate">${es(Auth.user.email || '')}</p>
+                    <p class="text-white text-sm mt-1.5 truncate">${es(Auth.maskEmail(Auth.user.email || ''))}</p>
                 </div>
                 <button onclick="Auth.signOut()" class="w-full btn-chrome font-bold py-3 rounded-full active:scale-95 transition-all flex items-center justify-center gap-2 text-rose-400">
                     <i data-lucide="log-out" class="w-4 h-4"></i> Log Out
                 </button>
             </div>`;
         } else {
-            var isSignin = Auth.authTab !== 'signup';
-            el.innerHTML = `
+            el.innerHTML = Auth.authFormHTML();
+        }
+        if (typeof lucide !== 'undefined' && lucide.createIcons) lucide.createIcons();
+    },
+
+    authFormHTML() {
+        var isSignin = Auth.authTab !== 'signup';
+        return `
             <div class="glass-strong rounded-2xl p-5">
                 <div class="flex gap-2 mb-4">
                     <button onclick="Auth.setAuthTab('signin')" class="flex-1 py-2 rounded-xl font-bold text-xs ${isSignin ? 'btn-chrome text-white' : 'text-white/50'}">Masuk</button>
@@ -175,7 +205,7 @@ var Auth = {
                 <div class="space-y-3 text-left">
                     ${!isSignin ? `
                     <div>
-                        <label class="text-white/50 text-xs uppercase tracking-wider">Username</label>
+                        <label class="text-white/50 text-xs uppercase tracking-wider">Username buat di Beatsify</label>
                         <input id="auth-username" type="text" placeholder="Nama tampilan kamu" class="glass-input w-full px-3 py-2.5 mt-1.5 text-sm text-white rounded-lg outline-none" />
                     </div>` : ''}
                     <div>
@@ -183,7 +213,7 @@ var Auth = {
                         <input id="auth-email" type="email" placeholder="nama@gmail.com" class="glass-input w-full px-3 py-2.5 mt-1.5 text-sm text-white rounded-lg outline-none" />
                     </div>
                     <div>
-                        <label class="text-white/50 text-xs uppercase tracking-wider">Password</label>
+                        <label class="text-white/50 text-xs uppercase tracking-wider">Pasword buat di Beatsify</label>
                         <input id="auth-password" type="password" placeholder="••••••••" class="glass-input w-full px-3 py-2.5 mt-1.5 text-sm text-white rounded-lg outline-none" />
                     </div>
                     <button id="auth-submit-btn" onclick="${isSignin ? 'Auth.signInEmail()' : 'Auth.signUpEmail()'}" class="w-full btn-chrome font-bold py-3 rounded-full active:scale-95 transition-all">
@@ -192,8 +222,30 @@ var Auth = {
                     ${isSignin ? `<p class="text-center text-white/40 text-xs">Belum punya akun? <button onclick="Auth.setAuthTab('signup')" class="text-white font-bold underline">Daftar dulu</button></p>` : ''}
                 </div>
             </div>`;
-        }
+    },
+
+    renderGate() {
+        var el = gid('auth-gate-form');
+        if (!el) return;
+        el.innerHTML = Auth.authFormHTML();
         if (typeof lucide !== 'undefined' && lucide.createIcons) lucide.createIcons();
+    },
+
+    _gateResolved: false,
+    syncGate() {
+        var gate = gid('auth-gate');
+        if (Auth.user) {
+            if (gate) gate.style.display = 'none';
+            if (typeof window.hideSplashScreen === 'function') window.hideSplashScreen();
+            if (!Auth._gateResolved) {
+                Auth._gateResolved = true;
+                if (typeof window.startBeatsifyApp === 'function') window.startBeatsifyApp();
+            }
+        } else {
+            if (typeof window.hideSplashScreen === 'function') window.hideSplashScreen();
+            if (gate) gate.style.display = 'flex';
+            Auth.renderGate();
+        }
     }
 };
 

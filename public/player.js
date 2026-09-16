@@ -265,7 +265,7 @@ function UU(){
 }
 
 function PK(s,i){
-    var l=[];if(s==='home1')l=S.ht.slice(0,6);else if(s==='home2')l=S.ht.slice(6,12);else if(s==='homecat')l=S.hc||[];else if(s==='search')l=S.sr;else if(s==='playlist')l=S.pl;else if(s==='rec0')l=S.rec0||[];else if(s==='rec1')l=S.rec1||[];else if(s==='rec2')l=S.rec2||[];
+    var l=[];if(s==='home1')l=S.ht.slice(0,6);else if(s==='home2')l=S.ht.slice(6,12);else if(s==='homecat')l=S.hc||[];else if(s==='search')l=S.sr;else if(s==='playlist'||s==='album'||s==='artist'||s==='direct')l=S.pl;else if(s==='rec0')l=S.rec0||[];else if(s==='rec1')l=S.rec1||[];else if(s==='rec2')l=S.rec2||[];
     if(!l[i])return;
     if(S.ct && (S.ct.id === l[i].id || S.ct.videoId === l[i].videoId) && AU.src){
         if(typeof MP !== 'undefined' && MP.togglePlay) { MP.togglePlay(); return; }
