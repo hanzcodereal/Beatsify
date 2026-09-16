@@ -1,5 +1,5 @@
 const { requireAdmin, loadAdminConfig, signAdminToken } = require('../lib/adminAuth.js');
-const { SUPABASE_URL, SUPABASE_KEY } = require('../lib/supabaseConfig.js');
+const { SUPABASE_URL, SUPABASE_KEY, SUPABASE_SERVICE_KEY } = require('../lib/supabaseConfig.js');
 
 async function handleLogin(req, res) {
     if (req.method !== 'POST') return res.status(405).json({ status: false, message: 'Method not allowed' });
@@ -67,8 +67,8 @@ async function handleInfo(req, res) {
             const r = await fetch(SUPABASE_URL + '/rest/v1/app_info', {
                 method: 'POST',
                 headers: {
-                    apikey: SUPABASE_KEY,
-                    Authorization: 'Bearer ' + SUPABASE_KEY,
+                    apikey: SUPABASE_SERVICE_KEY,
+                    Authorization: 'Bearer ' + SUPABASE_SERVICE_KEY,
                     'Content-Type': 'application/json',
                     Prefer: 'return=representation'
                 },
@@ -94,8 +94,8 @@ async function handleInfo(req, res) {
             const r = await fetch(SUPABASE_URL + '/rest/v1/app_info?id=eq.' + encodeURIComponent(id), {
                 method: 'DELETE',
                 headers: {
-                    apikey: SUPABASE_KEY,
-                    Authorization: 'Bearer ' + SUPABASE_KEY
+                    apikey: SUPABASE_SERVICE_KEY,
+                    Authorization: 'Bearer ' + SUPABASE_SERVICE_KEY
                 }
             });
 
