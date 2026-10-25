@@ -25,7 +25,7 @@ var MP={
                             <i data-lucide="play" class="w-4 h-4 fill-current ml-0.5"></i>
                         </div>
                     </button>
-                    <button id="mini-like-btn" onclick="toggleCurrentLike(); if(typeof event !== 'undefined') event.stopPropagation();" class="text-[#a0a5b0] hover:text-rose-400 active:scale-90 p-1.5 cursor-pointer" title="Sukai Lagu">
+                    <button id="mini-like-btn" onclick="toggleCurrentLike(); if(typeof event !== 'undefined') event.stopPropagation();" class="text-[#a0a5b0] hover:text-white active:scale-90 p-1.5 cursor-pointer" title="Sukai Lagu">
                         <i data-lucide="heart" class="w-5 h-5"></i>
                     </button>
                 </div>

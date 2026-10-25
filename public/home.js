@@ -445,7 +445,7 @@ var Home = {
 
             return '<div onclick="PK(\'home1\','+i+')" class="home-grid-card '+cardBg+' rounded-xl flex items-center gap-3 p-2 cursor-pointer active:scale-95 transition-all animate-stagger" style="animation-delay:'+(i*50)+'ms">'+
                 '<img src="'+t.cover+'" class="w-14 h-14 rounded-lg object-cover shrink-0" onerror="this.src=\''+FI+'\'" />'+
-                '<span class="home-grid-title font-bold text-sm line-clamp-2 min-w-0 flex-1 '+textStyle+'">'+es(t.title)+'</span>'+
+                '<div class="min-w-0 flex-1"><span class="home-grid-title font-bold text-sm line-clamp-2 '+textStyle+'">'+es(t.title)+'</span><p class="text-white/60 text-[11px] truncate mt-0.5">'+es(t.artist)+'</p></div>'+
                 '<div class="home-grid-icon ml-auto">'+playIconHtml+'</div>'+
             '</div>';
         }).join('');
@@ -550,7 +550,7 @@ var Home = {
 
                 var titleEl = el.querySelector('.home-grid-title');
                 if (titleEl) {
-                    titleEl.className = 'home-grid-title font-bold text-sm line-clamp-2 min-w-0 flex-1 ' + (isCur ? 'text-white font-black' : '');
+                    titleEl.className = 'home-grid-title font-bold text-sm line-clamp-2 ' + (isCur ? 'text-white font-black' : '');
                 }
                 var iconWrap = el.querySelector('.home-grid-icon');
                 if (iconWrap) {

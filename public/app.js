@@ -240,7 +240,7 @@ var Library={
             '</div>' +
             '<div class="flex gap-1 p-1 bg-white/5 rounded-2xl mb-5 border border-[#2a2a2a]">' +
                 '<button onclick="Library.setTab(\'liked\')" class="flex-1 py-2.5 px-2 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all ' + (isLikedTab ? 'btn-chrome text-white ' : 'text-[#a0a5b0] hover:text-white') + '">' +
-                    '<i data-lucide="heart" class="w-3.5 h-3.5 ' + (isLikedTab ? 'fill-current text-rose-400' : '') + '"></i>' +
+                    '<i data-lucide="heart" class="w-3.5 h-3.5 ' + (isLikedTab ? 'fill-current text-white' : '') + '"></i>' +
                     '<span>Disukai</span>' +
                 '</button>' +
                 '<button onclick="Library.setTab(\'artists\')" class="flex-1 py-2.5 px-2 rounded-xl font-bold text-xs flex items-center justify-center gap-1.5 transition-all ' + (isArtistsTab ? 'btn-chrome text-white ' : 'text-[#a0a5b0] hover:text-white') + '">' +
@@ -260,17 +260,17 @@ var Library={
         if(isLikedTab){
             if(likedSongs.length === 0){
                 html += '<div class="text-center text-white/70 py-16 px-4 glass rounded-3xl border border-[#2a2a2a] mt-2">' +
-                    '<div class="w-20 h-20 mx-auto mb-4 rounded-full bg-rose-500/10 flex items-center justify-center border border-rose-500/20">' +
-                        '<i data-lucide="heart" class="w-10 h-10 text-rose-400 opacity-60"></i>' +
+                    '<div class="w-20 h-20 mx-auto mb-4 rounded-full bg-white/10 flex items-center justify-center border border-[#3a3a3a]">' +
+                        '<i data-lucide="heart" class="w-10 h-10 text-white opacity-60"></i>' +
                     '</div>' +
                     '<h3 class="text-white font-bold text-lg mb-1">Belum Ada Lagu Disukai</h3>' +
-                    '<p class="text-xs text-white/70 max-w-xs mx-auto mb-6">Klik ikon <i data-lucide="heart" class="w-3.5 h-3.5 inline text-rose-400"></i> pada Mini Player atau Full Player saat memutar lagu favoritmu.</p>' +
+                    '<p class="text-xs text-white/70 max-w-xs mx-auto mb-6">Klik ikon <i data-lucide="heart" class="w-3.5 h-3.5 inline text-white"></i> pada Mini Player atau Full Player saat memutar lagu favoritmu.</p>' +
                     '<button onclick="App.switch(\'search\')" class="btn-chrome px-6 py-3 font-bold rounded-full text-xs active:scale-95">Cari & Temukan Lagu</button>' +
                 '</div>';
             } else {
-                html += '<div class="relative overflow-hidden rounded-2xl p-5 mb-5 bg-gradient-to-r from-rose-600/30 via-purple-600/20 to-indigo-600/10 border border-[#333333] flex items-center justify-between">' +
+                html += '<div class="relative overflow-hidden rounded-2xl p-5 mb-5 bg-white/5 border border-[#333333] flex items-center justify-between">' +
                     '<div class="flex items-center gap-4 min-w-0">' +
-                        '<div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-rose-500 to-rose-600 flex items-center justify-center flex-shrink-0">' +
+                        '<div class="w-14 h-14 rounded-2xl bg-white/10 border border-[#3a3a3a] flex items-center justify-center flex-shrink-0">' +
                             '<i data-lucide="heart" class="w-7 h-7 text-white fill-white"></i>' +
                         '</div>' +
                         '<div class="truncate">' +
@@ -297,15 +297,15 @@ var Library={
                     if (isLoad) {
                         iconOverlay = '<div class="w-5 h-5 border-2 border-amber-400 border-t-transparent rounded-full animate-spin"></div>';
                     } else if (isPlay) {
-                        iconOverlay = '<div class="flex items-end justify-center gap-[2px] w-5 h-5 pb-0.5"><span class="w-[2px] bg-rose-400 rounded-full animate-eq-1"></span><span class="w-[2px] bg-rose-400 rounded-full animate-eq-2"></span><span class="w-[2px] bg-rose-400 rounded-full animate-eq-3"></span></div>';
+                        iconOverlay = '<div class="flex items-end justify-center gap-[2px] w-5 h-5 pb-0.5"><span class="w-[2px] bg-white rounded-full animate-eq-1"></span><span class="w-[2px] bg-white rounded-full animate-eq-2"></span><span class="w-[2px] bg-white rounded-full animate-eq-3"></span></div>';
                     } else if (isCur) {
-                        iconOverlay = '<i data-lucide="pause" class="w-5 h-5 text-rose-400 fill-current"></i>';
+                        iconOverlay = '<i data-lucide="pause" class="w-5 h-5 text-white fill-current"></i>';
                     } else {
                         iconOverlay = '<i data-lucide="play" class="w-5 h-5 text-white fill-white"></i>';
                     }
 
-                    var rowBg = isPlay ? 'bg-gradient-to-r from-rose-500/20 via-rose-500/10 to-transparent border border-rose-500/30 shadow-md' : (isCur ? 'bg-white/10 border border-[#4a4a4a]' : 'bg-black border border-[#3a3a3a] hover:bg-white/5');
-                    var titleClass = isCur ? 'text-rose-400 font-bold' : 'text-white font-bold';
+                    var rowBg = isPlay ? 'bg-white/15 border border-[#4a4a4a] shadow-md' : (isCur ? 'bg-white/10 border border-[#4a4a4a]' : 'bg-black border border-[#3a3a3a] hover:bg-white/5');
+                    var titleClass = isCur ? 'text-white font-bold' : 'text-white font-bold';
 
                     html += '<div class="flex items-center gap-3 p-2.5 rounded-2xl active:scale-[0.99] transition-all group ' + rowBg + '">' +
                         '<div onclick="Library.playLikedIndex(' + i + ')" class="flex items-center gap-3 flex-1 min-w-0 cursor-pointer">' +
@@ -320,8 +320,8 @@ var Library={
                                 '<p class="text-white/70 text-xs truncate mt-0.5">' + es(s.artist) + '</p>' +
                             '</div>' +
                         '</div>' +
-                        '<button onclick="toggleLikeSong(' + es(JSON.stringify(s)).replace(/"/g, '&quot;') + ')" class="p-2 text-rose-500 hover:scale-110 active:scale-90 transition-all" title="Hapus dari Lagu Disukai">' +
-                            '<i data-lucide="heart" class="w-5 h-5 fill-rose-500"></i>' +
+                        '<button onclick="toggleLikeSong(' + es(JSON.stringify(s)).replace(/"/g, '&quot;') + ')" class="p-2 text-white hover:scale-110 active:scale-90 transition-all" title="Hapus dari Lagu Disukai">' +
+                            '<i data-lucide="heart" class="w-5 h-5 fill-white"></i>' +
                         '</button>' +
                         '<button onclick="showPlaylistPicker(' + es(JSON.stringify(s)).replace(/"/g, '&quot;') + ')" class="p-2 text-white/70 hover:text-white active:scale-90 transition-all" title="Tambah ke Playlist">' +
                             '<i data-lucide="plus-circle" class="w-5 h-5"></i>' +
@@ -616,15 +616,15 @@ var Library={
                 if (isLoad) {
                     iconOverlay = '<div class="w-4 h-4 border-2 border-amber-400 border-t-transparent rounded-full animate-spin"></div>';
                 } else if (isPlay) {
-                    iconOverlay = '<div class="flex items-end justify-center gap-[2px] w-4 h-4 pb-0.5"><span class="w-[2px] bg-rose-400 rounded-full animate-eq-1"></span><span class="w-[2px] bg-rose-400 rounded-full animate-eq-2"></span><span class="w-[2px] bg-rose-400 rounded-full animate-eq-3"></span></div>';
+                    iconOverlay = '<div class="flex items-end justify-center gap-[2px] w-4 h-4 pb-0.5"><span class="w-[2px] bg-white rounded-full animate-eq-1"></span><span class="w-[2px] bg-white rounded-full animate-eq-2"></span><span class="w-[2px] bg-white rounded-full animate-eq-3"></span></div>';
                 } else if (isCur) {
-                    iconOverlay = '<i data-lucide="pause" class="w-4 h-4 text-rose-400 fill-current"></i>';
+                    iconOverlay = '<i data-lucide="pause" class="w-4 h-4 text-white fill-current"></i>';
                 } else {
                     iconOverlay = '<i data-lucide="play" class="w-4 h-4 text-white fill-white"></i>';
                 }
 
-                var rowBg = isPlay ? 'bg-gradient-to-r from-rose-500/20 via-rose-500/10 to-transparent border border-rose-500/30 shadow-md' : (isCur ? 'bg-white/10 border border-[#4a4a4a]' : 'bg-black border border-[#3a3a3a] hover:bg-white/5');
-                var titleClass = isCur ? 'text-rose-400 font-bold' : 'text-white font-medium';
+                var rowBg = isPlay ? 'bg-white/15 border border-[#4a4a4a] shadow-md' : (isCur ? 'bg-white/10 border border-[#4a4a4a]' : 'bg-black border border-[#3a3a3a] hover:bg-white/5');
+                var titleClass = isCur ? 'text-white font-bold' : 'text-white font-medium';
 
                 html+='<div class="flex items-center gap-2 p-2 rounded-lg active:scale-[0.98] ' + rowBg + '"><div onclick="Library.playSong(\''+id+'\','+i+')" class="flex items-center gap-3 flex-1 cursor-pointer overflow-hidden"><div class="relative w-10 h-10 rounded overflow-hidden shrink-0"><img src="'+s.cover+'" class="w-full h-full object-cover" onerror="this.src=\'' + FI + '\'" /><div class="absolute inset-0 bg-black/80 ' + (isCur ? 'opacity-100' : 'opacity-0 group-hover:opacity-100') + ' transition-all flex items-center justify-center">' + iconOverlay + '</div></div><div class="truncate flex-1 min-w-0"><p class="text-sm truncate ' + titleClass + '">'+es(s.title)+'</p><p class="text-white/70 text-xs truncate">'+es(s.artist)+'</p></div></div><button onclick="Library.removeSong(\''+id+'\','+i+')" class="text-white/70 hover:text-red-400 p-2 active:scale-90 shrink-0" title="Hapus"><i data-lucide="x" class="w-5 h-5"></i></button></div>';
             });
@@ -671,9 +671,9 @@ var Library={
             if (isLoad) {
                 iconOverlay = '<div class="w-4 h-4 border-2 border-amber-400 border-t-transparent rounded-full animate-spin"></div>';
             } else if (isPlay) {
-                iconOverlay = '<div class="flex items-end justify-center gap-[2px] w-4 h-4 pb-0.5"><span class="w-[2px] bg-rose-400 rounded-full animate-eq-1"></span><span class="w-[2px] bg-rose-400 rounded-full animate-eq-2"></span><span class="w-[2px] bg-rose-400 rounded-full animate-eq-3"></span></div>';
+                iconOverlay = '<div class="flex items-end justify-center gap-[2px] w-4 h-4 pb-0.5"><span class="w-[2px] bg-white rounded-full animate-eq-1"></span><span class="w-[2px] bg-white rounded-full animate-eq-2"></span><span class="w-[2px] bg-white rounded-full animate-eq-3"></span></div>';
             } else if (isCur) {
-                iconOverlay = '<i data-lucide="pause" class="w-4 h-4 text-rose-400 fill-current"></i>';
+                iconOverlay = '<i data-lucide="pause" class="w-4 h-4 text-white fill-current"></i>';
             } else {
                 iconOverlay = '<i data-lucide="play" class="w-4 h-4 text-white fill-white"></i>';
             }
@@ -684,12 +684,12 @@ var Library={
                 coverOverlay.className = 'absolute inset-0 bg-black/80 ' + (isCur ? 'opacity-100' : 'opacity-0 group-hover:opacity-100') + ' transition-all flex items-center justify-center';
             }
 
-            var rowBg = isPlay ? 'bg-gradient-to-r from-rose-500/20 via-rose-500/10 to-transparent border border-rose-500/30 shadow-md' : (isCur ? 'bg-white/10 border border-[#4a4a4a]' : 'bg-black border border-[#3a3a3a] hover:bg-white/5');
+            var rowBg = isPlay ? 'bg-white/15 border border-[#4a4a4a] shadow-md' : (isCur ? 'bg-white/10 border border-[#4a4a4a]' : 'bg-black border border-[#3a3a3a] hover:bg-white/5');
             el.className = 'flex items-center gap-2 p-2 rounded-lg active:scale-[0.98] ' + rowBg;
 
             var titleEl = el.querySelector('p');
             if (titleEl) {
-                titleEl.className = 'text-sm truncate ' + (isCur ? 'text-rose-400 font-bold' : 'text-white font-medium');
+                titleEl.className = 'text-sm truncate ' + (isCur ? 'text-white font-bold' : 'text-white font-medium');
             }
         }
         lucide.createIcons();

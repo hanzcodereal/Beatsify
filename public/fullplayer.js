@@ -42,6 +42,14 @@ var FullPlayer={
                     </div>
 
                     <div id="full-lyrics-view" class="flip-face flip-face-back w-full h-full relative rounded-2xl bg-black/50 backdrop-blur-2xl border border-[#383838] p-3.5 overflow-hidden flex flex-col shadow-2xl">
+                        <div class="flex items-center gap-2.5 pb-2.5 mb-1 border-b border-[#333333] shrink-0 relative z-10">
+                            <img id="full-inline-cover" src="" alt="" class="w-10 h-10 rounded-lg object-cover shadow-md border border-[#333333] shrink-0 bg-white/5" />
+                            <div class="min-w-0 flex-1">
+                                <p id="full-inline-title" class="text-xs sm:text-sm font-bold text-white truncate"></p>
+                                <p id="full-inline-artist" class="text-[11px] text-[#a0a5b0] truncate"></p>
+                            </div>
+                            <button type="button" onclick="FullPlayer.switchView('cover')" class="px-2.5 py-1 rounded-full bg-white/10 hover:bg-white/20 text-[11px] font-semibold text-white border border-[#3a3a3a] active:scale-95 transition-all cursor-pointer shrink-0">Cover</button>
+                        </div>
                         <div id="full-inline-lyrics-scroll" class="flex-1 w-full overflow-y-auto no-scrollbar scroll-smooth relative z-10" style="touch-action:pan-y;">
                             <div id="full-inline-lyrics-loading" class="hidden h-full flex flex-col items-center justify-center text-white/50 text-xs gap-2 py-8">
                                 <div class="w-6 h-6 border-2 border-[#3a3a3a] border-t-white rounded-full animate-spin"></div>
@@ -288,19 +296,11 @@ var FullPlayer={
                     <i data-lucide="list-music" class="w-5 h-5 text-white"></i>
                     <span class="text-xs font-semibold text-white/90">Queue</span>
                 </button>
-                <button onclick="gid('full-more-sheet').remove();downloadCurrentSong();" class="flex flex-col items-center gap-1.5 p-3 rounded-2xl bg-white/5 hover:bg-white/10 active:scale-95 transition cursor-pointer">
-                    <i data-lucide="download" class="w-5 h-5 text-white"></i>
-                    <span class="text-xs font-semibold text-white/90">Download</span>
-                </button>
-                <button onclick="gid('full-more-sheet').remove();openShareCard();" class="flex flex-col items-center gap-1.5 p-3 rounded-2xl bg-white/5 hover:bg-white/10 active:scale-95 transition cursor-pointer">
+                                <button onclick="gid('full-more-sheet').remove();openShareCard();" class="flex flex-col items-center gap-1.5 p-3 rounded-2xl bg-white/5 hover:bg-white/10 active:scale-95 transition cursor-pointer">
                     <i data-lucide="share-2" class="w-5 h-5 text-white"></i>
                     <span class="text-xs font-semibold text-white/90">Share</span>
                 </button>
-                <button onclick="gid('full-more-sheet').remove();openVolumeControl();" class="flex flex-col items-center gap-1.5 p-3 rounded-2xl bg-white/5 hover:bg-white/10 active:scale-95 transition cursor-pointer">
-                    <i data-lucide="volume-2" class="w-5 h-5 text-white"></i>
-                    <span class="text-xs font-semibold text-white/90">Volume</span>
-                </button>
-                <button onclick="gid('full-more-sheet').remove();FullPlayer.openArtist();" class="flex flex-col items-center gap-1.5 p-3 rounded-2xl bg-white/5 hover:bg-white/10 active:scale-95 transition cursor-pointer">
+                                <button onclick="gid('full-more-sheet').remove();FullPlayer.openArtist();" class="flex flex-col items-center gap-1.5 p-3 rounded-2xl bg-white/5 hover:bg-white/10 active:scale-95 transition cursor-pointer">
                     <i data-lucide="user" class="w-5 h-5 text-white"></i>
                     <span class="text-xs font-semibold text-white/90">Lihat Artis</span>
                 </button>

@@ -276,6 +276,10 @@ function UU(){
     if(fa)fa.innerText=S.ct.artist;
     if(fh)fh.innerText=S.ct.artist;
     if(fb)fb.src=S.ct.cover;
+    var ic=gid('full-inline-cover'),it=gid('full-inline-title'),ia=gid('full-inline-artist');
+    if(ic){ic.src=S.ct.cover;ic.onerror=function(){handleImgError(this);};}
+    if(it)it.innerText=S.ct.title;
+    if(ia)ia.innerText=S.ct.artist;
     if(fba)fba.src=S.ct.cover;
     updateOG(S.ct.title,S.ct.cover,S.ct.artist);
     if(typeof updateLikeButtons==='function')updateLikeButtons();
@@ -821,24 +825,13 @@ function updateLikeButtons(){
     var miniBtn = gid('mini-like-btn');
     var fullBtn = gid('full-like-btn');
     if(miniBtn){
-        if(isLiked){
-            miniBtn.innerHTML = '<i data-lucide="heart" class="w-4 h-4 text-rose-500 fill-rose-500"></i>';
-            miniBtn.classList.add('text-rose-500');
-        } else {
-            miniBtn.innerHTML = '<i data-lucide="heart" class="w-4 h-4"></i>';
-            miniBtn.classList.remove('text-rose-500');
-        }
+        miniBtn.className = 'active:scale-90 p-1.5 cursor-pointer transition-colors ' + (isLiked ? 'text-white' : 'text-[#a0a5b0] hover:text-white');
+        miniBtn.innerHTML = '<i data-lucide="heart" class="w-5 h-5 ' + (isLiked ? 'fill-current' : '') + '"></i>';
     }
     if(fullBtn){
-        if(isLiked){
-            fullBtn.innerHTML = '<i data-lucide="heart" class="w-5 h-5 text-rose-500 fill-rose-500"></i>';
-            fullBtn.classList.add('bg-rose-500/20', 'border-rose-500/40');
-            fullBtn.classList.remove('bg-black/50', 'border-[#3a3a3a]');
-        } else {
-            fullBtn.innerHTML = '<i data-lucide="heart" class="w-5 h-5 text-white"></i>';
-            fullBtn.classList.remove('bg-rose-500/20', 'border-rose-500/40');
-            fullBtn.classList.add('bg-black/50', 'border-[#3a3a3a]');
-        }
+        fullBtn.className = 'w-11 h-11 rounded-full flex items-center justify-center active:scale-90 transition-all shrink-0 cursor-pointer shadow-md ' +
+            (isLiked ? 'bg-white text-black border border-white' : 'bg-white/10 hover:bg-white/20 border border-[#333333] text-white');
+        fullBtn.innerHTML = '<i data-lucide="heart" class="w-5 h-5 ' + (isLiked ? 'fill-current text-black' : 'text-white') + '"></i>';
     }
     if(typeof lucide !== 'undefined' && lucide.createIcons) lucide.createIcons();
 }
@@ -1199,44 +1192,6 @@ function closePlaybackSpeed() {
     if (p) p.remove();
 }
 
-function openVolumeControl() {
-    if (gid('volume-popup')) return;
-    var popup = document.createElement('div');
-    popup.id = 'volume-popup';
-    popup.className = 'fixed inset-0 z-[300] flex items-end justify-center bg-black/60';
-    popup.onclick = function(e) { if(e.target === popup) closeVolumeControl(); };
-    var vol = Math.round((AU.volume !== undefined ? AU.volume : 1) * 100);
-    popup.innerHTML = '<div class="w-full max-w-md rounded-t-3xl p-6 border-t border-[#333333] glass-strong" style="animation:slideUp 0.3s ease-out forwards; background: var(--bg-color);">' +
-        '<div class="w-10 h-1 bg-white/20 rounded-full mx-auto mb-4"></div>' +
-        '<div class="flex justify-between items-center mb-6">' +
-            '<div>' +
-                '<h3 class="font-black text-white text-lg">Volume</h3>' +
-                '<p class="text-[#6b7280] text-xs">Atur volume pemutaran lagu</p>' +
-            '</div>' +
-            '<button onclick="closeVolumeControl()" class="text-[#6b7280] hover:text-white p-1"><i data-lucide="x" class="w-5 h-5"></i></button>' +
-        '</div>' +
-        '<div class="flex items-center gap-3">' +
-            '<i data-lucide="volume-1" class="w-5 h-5 text-[#a0a5b0] shrink-0"></i>' +
-            '<input type="range" id="volume-slider" min="0" max="100" value="' + vol + '" oninput="setVolumeLevel(this.value)" class="flex-1 h-1.5 rounded-full accent-white cursor-pointer" />' +
-            '<i data-lucide="volume-2" class="w-5 h-5 text-[#a0a5b0] shrink-0"></i>' +
-        '</div>' +
-        '<p id="volume-value" class="text-center text-white font-bold text-sm mt-3">' + vol + '%</p>' +
-    '</div>';
-    document.body.appendChild(popup);
-    lucide.createIcons();
-}
-function closeVolumeControl() {
-    var p = gid('volume-popup');
-    if (p) p.remove();
-}
-function setVolumeLevel(v) {
-    var vol = Math.max(0, Math.min(100, parseInt(v, 10) || 0));
-    AU.volume = vol / 100;
-    try { localStorage.setItem('hanz_volume', vol); } catch(e) {}
-    var label = gid('volume-value');
-    if (label) label.innerText = vol + '%';
-}
-
 function openEqualizer() {
     if (document.getElementById('equalizer-popup')) return;
     if (!S.eqBands) S.eqBands = [0, 0, 0, 0, 0];
@@ -1347,55 +1302,37 @@ function openShareCard() {
         showToast('Putar lagu terlebih dahulu');
         return;
     }
+    var old = gid('share-card-popup'); if (old) old.remove();
     var popup = document.createElement('div');
     popup.id = 'share-card-popup';
-    popup.className = 'fixed inset-0 z-[300] flex items-center justify-center bg-black/75 px-4';
+    popup.className = 'fixed inset-0 z-[300] flex items-end justify-center bg-black/60';
     popup.onclick = function(e) { if(e.target === popup) popup.remove(); };
-    popup.innerHTML = '<div class="w-full max-w-sm rounded-3xl p-6 border border-[#333333] glass-strong text-center" style="animation:slideUp 0.3s ease-out forwards; background: var(--bg-color);">' +
-        '<div class="flex justify-between items-center mb-4">' +
-            '<h3 class="font-bold text-lg text-white">Bagikan Lagu</h3>' +
-            '<button onclick="document.getElementById(\'share-card-popup\').remove()" class="text-[#a0a5b0] hover:text-white p-1"><i data-lucide="x" class="w-5 h-5"></i></button>' +
+    popup.innerHTML = '<div class="w-full max-w-md rounded-t-3xl p-6 border-t border-[#333333] glass-strong space-y-4" style="animation:slideUp 0.3s ease-out forwards; background: var(--bg-color);">' +
+        '<div class="w-10 h-1 bg-white/20 rounded-full mx-auto mb-3"></div>' +
+        '<h3 class="font-bold text-white text-base">Bagikan Lagu</h3>' +
+        '<div class="flex items-center gap-3 p-3 rounded-2xl bg-white/5">' +
+            '<img src="' + Auth._attr(S.ct.cover || FI) + '" class="w-14 h-14 rounded-xl object-cover" onerror="this.src=\'' + FI + '\'" />' +
+            '<div class="min-w-0 flex-1"><h4 class="font-bold text-white text-sm truncate">' + es(S.ct.title) + '</h4><p class="text-xs text-white/60 truncate mt-0.5">' + es(S.ct.artist) + '</p></div>' +
         '</div>' +
-        '<div id="share-card-preview" class="p-6 rounded-2xl mb-6 flex flex-col items-center gap-4 relative overflow-hidden" ' +
-            'style="box-shadow: var(--nm-shadow-inset); background: var(--bg-color); border: 1px solid var(--border-color);">' +
-            '<img src="' + S.ct.cover + '" class="w-48 h-48 object-cover rounded-2xl border border-[#2a2a2a]" />' +
-            '<div class="w-full truncate">' +
-                '<p class="text-white font-black text-lg truncate">' + es(S.ct.title) + '</p>' +
-                '<p class="text-[#a0a5b0] text-xs font-bold mt-1 truncate">' + es(S.ct.artist) + '</p>' +
-            '</div>' +
-            '<div class="w-full h-1 bg-white/10 rounded-full mt-2 overflow-hidden"><div class="h-full bg-gradient-to-r from-gray-400 to-white w-2/3"></div></div>' +
-            '<div class="flex justify-between w-full text-[9px] text-[#6b7280] font-mono mt-1"><span>1:48</span><span>2:56</span></div>' +
-            '<div class="border-t border-[#2a2a2a] w-full pt-3 mt-1 flex items-center justify-center gap-1.5">' +
-                '<i data-lucide="music" class="w-3.5 h-3.5 text-[#a0a5b0]"></i>' +
-                '<span class="text-[10px] text-[#6b7280] tracking-wider font-semibold uppercase">Beatsify Web App</span>' +
-            '</div>' +
-        '</div>' +
-        '<div class="space-y-2.5">' +
-            '<button onclick="downloadShareCard()" class="w-full btn-chrome py-3 flex items-center justify-center gap-2 font-bold">' +
-                '<i data-lucide="download" class="w-4 h-4"></i> Unduh Gambar Card' +
-            '</button>' +
-            '<div class="grid grid-cols-2 gap-2">' +
-                '<button onclick="copyShareLink()" class="btn-chrome py-3 text-sm font-semibold flex items-center justify-center gap-1.5">' +
-                    '<i data-lucide="copy" class="w-4 h-4"></i> Salin Link' +
-                '</button>' +
-                '<button onclick="triggerNativeShare()" class="btn-chrome py-3 text-sm font-semibold flex items-center justify-center gap-1.5">' +
-                    '<i data-lucide="share" class="w-4 h-4"></i> Bagikan' +
-                '</button>' +
-            '</div>' +
+        '<div class="flex gap-3">' +
+            '<button onclick="triggerNativeShare()" class="flex-1 btn-chrome font-bold py-3 rounded-full text-xs flex items-center justify-center gap-2">Bagikan Langsung</button>' +
+            '<button onclick="copyShareLink()" class="px-6 py-3 glass glass-hover text-white rounded-full text-xs font-bold">Salin Link</button>' +
         '</div>' +
     '</div>';
     document.body.appendChild(popup);
-    lucide.createIcons();
 }
+
+function closeShareCard() { var p = gid('share-card-popup'); if (p) p.remove(); }
 
 function copyShareLink() {
     if(!S.ct || !S.ct.videoId) return;
     var url = location.origin + '/play/' + S.ct.videoId + '?share=true';
-    navigator.clipboard.writeText(url).then(function() {
-        showToast('Link berhasil disalin ke clipboard!');
-    }).catch(function() {
+    var done = function() { showToast('Link berhasil disalin ke clipboard!'); closeShareCard(); };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(url).then(done).catch(function() { showToast('Gagal menyalin link'); });
+    } else {
         showToast('Gagal menyalin link');
-    });
+    }
 }
 
 function triggerNativeShare() {
@@ -1403,100 +1340,13 @@ function triggerNativeShare() {
     var url = location.origin + '/play/' + S.ct.videoId + '?share=true';
     if (navigator.share) {
         navigator.share({
-            title: S.ct.title,
-            text: 'Dengarkan ' + S.ct.title + ' - ' + S.ct.artist + ' di Beatsify!',
+            title: S.ct.title + ' - ' + S.ct.artist,
+            text: 'Dengarkan lagu ' + S.ct.title + ' di Beatsify!',
             url: url
-        }).catch(function() {});
+        }).then(closeShareCard).catch(function() {});
     } else {
         copyShareLink();
     }
-}
-
-function downloadShareCard() {
-    if (!S.ct) return;
-    var canvas = document.createElement('canvas');
-    canvas.width = 600;
-    canvas.height = 800;
-    var ctx = canvas.getContext('2d');
-    var grad = ctx.createLinearGradient(0, 0, 0, 800);
-    var isLight = localStorage.getItem('theme') === 'light';
-    if (isLight) {
-        grad.addColorStop(0, '#e0e5ec');
-        grad.addColorStop(1, '#c8d0db');
-        ctx.fillStyle = grad;
-        ctx.fillRect(0, 0, 600, 800);
-    } else {
-        grad.addColorStop(0, '#000000');
-        grad.addColorStop(1, '#0f1014');
-        ctx.fillStyle = grad;
-        ctx.fillRect(0, 0, 600, 800);
-    }
-    ctx.strokeStyle = isLight ? 'rgba(0,0,0,0.05)' : 'rgba(255,255,255,0.05)';
-    ctx.lineWidth = 2;
-    ctx.strokeRect(30, 30, 540, 740);
-    var img = new Image();
-    img.crossOrigin = 'anonymous';
-    img.onload = function() {
-        ctx.save();
-        var rx = 100, ry = 80, rw = 400, rh = 400, radius = 24;
-        ctx.beginPath();
-        ctx.moveTo(rx + radius, ry);
-        ctx.lineTo(rx + rw - radius, ry);
-        ctx.quadraticCurveTo(rx + rw, ry, rx + rw, ry + radius);
-        ctx.lineTo(rx + rw, ry + rh - radius);
-        ctx.quadraticCurveTo(rx + rw, ry + rh, rx + rw - radius, ry + rh);
-        ctx.lineTo(rx + radius, ry + rh);
-        ctx.quadraticCurveTo(rx, ry + rh, rx, ry + rh - radius);
-        ctx.lineTo(rx, ry + radius);
-        ctx.quadraticCurveTo(rx, ry, rx + radius, ry);
-        ctx.closePath();
-        ctx.clip();
-        ctx.drawImage(img, rx, ry, rw, rh);
-        ctx.restore();
-        ctx.fillStyle = isLight ? '#2d3748' : '#ffffff';
-        ctx.font = '900 32px sans-serif';
-        ctx.textAlign = 'center';
-        ctx.fillText(S.ct.title, 300, 540, 480);
-        ctx.fillStyle = isLight ? '#718096' : '#a0a5b0';
-        ctx.font = 'bold 24px sans-serif';
-        ctx.fillText(S.ct.artist, 300, 585, 480);
-        ctx.fillStyle = isLight ? '#a0aec0' : '#4a5568';
-        ctx.font = '16px monospace';
-        ctx.fillText('DIDENGARKAN DI BEATSIFY', 300, 710);
-        try {
-            var dataUrl = canvas.toDataURL('image/png');
-            var a = document.createElement('a');
-            a.download = S.ct.title.replace(/[^a-zA-Z0-9]/g, '_') + '_beatsify.png';
-            a.href = dataUrl;
-            a.click();
-            showToast('Berhasil mengunduh Share Card!');
-        } catch(e) {
-            showToast('Gagal unduh karena CORS gambar, silakan screenshot layar!');
-        }
-    };
-    img.onerror = function() {
-        ctx.fillStyle = isLight ? '#2d3748' : '#ffffff';
-        ctx.font = '900 32px sans-serif';
-        ctx.textAlign = 'center';
-        ctx.fillText(S.ct.title, 300, 300, 480);
-        ctx.fillStyle = isLight ? '#718096' : '#a0a5b0';
-        ctx.font = 'bold 24px sans-serif';
-        ctx.fillText(S.ct.artist, 300, 360, 480);
-        ctx.fillStyle = isLight ? '#a0aec0' : '#4a5568';
-        ctx.font = '16px monospace';
-        ctx.fillText('DIDENGARKAN DI BEATSIFY', 300, 710);
-        try {
-            var dataUrl = canvas.toDataURL('image/png');
-            var a = document.createElement('a');
-            a.download = S.ct.title.replace(/[^a-zA-Z0-9]/g, '_') + '_beatsify.png';
-            a.href = dataUrl;
-            a.click();
-            showToast('Berhasil mengunduh Share Card (tanpa cover)!');
-        } catch(ex) {
-            showToast('Gagal mengunduh Share Card');
-        }
-    };
-    img.src = S.ct.cover || FI;
 }
 
 function openQueue(){
@@ -1538,27 +1388,4 @@ function playQueueIndex(i){
     resetLyricsUI(S.ct.videoId);
     loadTrack(S.ct);
     closeQueue();
-}
-
-function downloadCurrentSong(){
-    if(!S.ct)return;
-    showToast('Menyiapkan unduhan...');
-    var ytUrl=S.ct.ytUrl||('https://youtube.com/watch?v='+S.ct.videoId);
-    fetch(API.ytplay,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({query:ytUrl})})
-        .then(function(r){return r.json();})
-        .then(function(d){
-            if(d&&d.status&&d.result&&d.result.download&&d.result.download.audio){
-                var audioUrl=d.result.download.audio;
-                var a=document.createElement('a');
-                a.href='/api/proxy-audio?url='+encodeURIComponent(audioUrl);
-                a.download=(S.ct.title||'lagu').replace(/[^a-zA-Z0-9]/g,'_')+'.mp3';
-                document.body.appendChild(a);
-                a.click();
-                a.remove();
-                showToast('Unduhan dimulai!');
-            }else{
-                showToast('Gagal mengambil link unduhan');
-            }
-        })
-        .catch(function(){showToast('Gagal mengunduh lagu');});
 }
