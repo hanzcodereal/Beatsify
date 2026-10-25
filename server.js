@@ -20,6 +20,7 @@ app.use((req, res, next) => {
 });
 
 app.all('/api/search', require('./api/search.js'));
+app.all('/api/home', require('./api/home.js'));
 app.all('/api/lyrics', require('./api/lyrics.js'));
 app.all('/api/lyrics1', require('./api/lyrics1.js'));
 app.all('/api/artist', require('./api/artist.js'));
