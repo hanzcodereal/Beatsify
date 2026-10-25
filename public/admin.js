@@ -45,7 +45,8 @@ var AdminApp = {
             var d = await r.json();
             if (!d.status) { AdminApp.renderLogin(d.message || 'Login gagal'); return; }
             AdminApp.setToken(d.token);
-            AdminApp.renderDashboard();
+            var ok = await AdminApp.renderDashboard();
+            if (!ok) AdminApp.renderLogin('Sesi admin tidak valid, coba masuk lagi');
         } catch (e) {
             AdminApp.renderLogin('Gagal terhubung ke server');
         }
@@ -66,7 +67,8 @@ var AdminApp = {
             return false;
         }
         if (statsRes.status === 401) { AdminApp.clearToken(); return false; }
-        var stats = await statsRes.json();
+        var stats = {};
+        try { stats = await statsRes.json(); } catch (e) { stats = {}; }
 
         gid('admin-root').innerHTML = `
         <div class="flex justify-between items-center mb-6">

@@ -31,6 +31,7 @@ var Album = {
         }
     },
     open(id, passedCoverUrl) {
+        Album.currentAlbumId = id;
         var url=location.origin+'/album/'+id;
         history.pushState({},'',url);
         gid('album-modal').style.display='flex';
@@ -39,9 +40,10 @@ var Album = {
             <div class="w-10 h-10 border-3 border-[#cfd3d8] border-t-transparent rounded-full animate-spin"></div>
         </div>`;
         
-        fetch('/api/album?id=' + id)
+        fetch('/api/album?id=' + encodeURIComponent(id))
         .then(res => res.json())
         .then(data => {
+            if(Album.currentAlbumId !== id) return;
             if(!data.status || !data.result) {
                 gid('album-content').innerHTML = '<div class="p-6 text-center text-white/70 mt-20">Gagal memuat album</div>';
                 return;
@@ -78,10 +80,10 @@ var Album = {
 
             <div class="px-6">
                 <div class="flex items-center gap-4 mb-6">
-                    <button onclick="Album.playAll('${id}')" class="bg-white hover:bg-gray-200 text-black w-14 h-14 rounded-full flex items-center justify-center active:scale-95 transition-all  shadow-white/20">
+                    <button onclick="Album.playAll('${esJs(id)}')" class="bg-white hover:bg-gray-200 text-black w-14 h-14 rounded-full flex items-center justify-center active:scale-95 transition-all  shadow-white/20">
                         <i data-lucide="play" class="w-7 h-7 fill-current ml-1"></i>
                     </button>
-                    <button onclick="Album.importPlaylist('${id}', '${es(a.title).replace(/'/g, "\\'")}', '${im}')" class="text-white/70 hover:text-white p-3 rounded-full active:scale-95 bg-white/5 transition-all" title="Simpan sebagai Playlist Baru"><i data-lucide="download" class="w-6 h-6"></i></button><button onclick="Album.shuffleAll('${id}')" class="text-white/70 hover:text-white p-3 rounded-full active:scale-95 bg-white/5 transition-all" title="Acak (Shuffle)">
+                    <button onclick="Album.importPlaylist('${esJs(id)}', '${esJs(a.title)}', '${esJs(im)}')" class="text-white/70 hover:text-white p-3 rounded-full active:scale-95 bg-white/5 transition-all" title="Simpan sebagai Playlist Baru"><i data-lucide="download" class="w-6 h-6"></i></button><button onclick="Album.shuffleAll('${esJs(id)}')" class="text-white/70 hover:text-white p-3 rounded-full active:scale-95 bg-white/5 transition-all" title="Acak (Shuffle)">
                         <i data-lucide="shuffle" class="w-6 h-6"></i>
                     </button>
                 </div>`;
@@ -133,7 +135,7 @@ var Album = {
                     var titleClass = isCur ? 'text-white font-bold' : 'text-white/90 font-medium';
 
                     html += `
-                    <div onclick="Album.playSong('${id}', ${i})" class="flex items-center gap-3 p-3 rounded-xl cursor-pointer group active:scale-[0.98] transition-all ${rowBg}">
+                    <div onclick="Album.playSong('${esJs(id)}', ${i})" class="flex items-center gap-3 p-3 rounded-xl cursor-pointer group active:scale-[0.98] transition-all ${rowBg}">
                         <div class="w-6 text-center text-white/70 text-sm group-hover:text-white shrink-0">${numHtml}</div>
                         <img src="${sim}" class="w-10 h-10 rounded object-cover shadow-sm shrink-0" onerror="this.src='${FI}'" />
                         <div class="truncate flex-1 min-w-0 pr-4">
@@ -141,7 +143,7 @@ var Album = {
                             <p class="text-white/70 text-xs truncate">${es(s.artist)}</p>
                         </div>
                         <div class="text-xs text-white/70 font-mono opacity-80 shrink-0">${es(s.duration)}</div>
-                        <button onclick="event.stopPropagation();showPlaylistPicker(S['album_'+'${id}'][${i}])" class="text-white/70 hover:text-white p-2 active:scale-90 opacity-0 group-hover:opacity-100 transition-opacity shrink-0"><i data-lucide="plus" class="w-5 h-5"></i></button>
+                        <button onclick="event.stopPropagation();showPlaylistPicker(S['album_'+'${esJs(id)}'][${i}])" class="text-white/70 hover:text-white p-2 active:scale-90 opacity-60 group-hover:opacity-100 transition-opacity shrink-0"><i data-lucide="plus" class="w-5 h-5"></i></button>
                     </div>`;
                 });
                 html += '</div>';
@@ -154,7 +156,8 @@ var Album = {
             lucide.createIcons();
         })
         .catch(e => {
-            gid('album-content').innerHTML = '<div class="p-6 text-center text-white/70 mt-20">Gagal: '+e.message+'</div>';
+            if(Album.currentAlbumId !== id) return;
+            gid('album-content').innerHTML = '<div class="p-6 text-center text-white/70 mt-20">Gagal memuat album. Periksa koneksi internetmu.</div>';
         });
     },
     currentAlbumId: null,

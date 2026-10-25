@@ -29,11 +29,12 @@ function handleImgError(img) {
     }
 }
 
-const S={ht:[],htr:[],hal:[],sr:[],ar:[],hc:[],hcp:[],hca:[],sq:'',filter:'all',ct:null,pl:[],pi:-1,ps:'',ip:false,il:false,rm:'all',isShuffle:false,currentAccentColor:'#f43f5e',autoNext:true,iv:null,pt:0,pd:0,at:'home',ld:{type:'none',lines:[]},cli:-1,lo:false,lyricOffset:0,playbackRate:1.0,sleepSecondsLeft:0,sleepEndWithTrack:false,lyricsTranslate:false};
+const S={ht:[],htr:[],hal:[],sr:[],ar:[],hc:[],hcp:[],hca:[],sq:'',filter:'all',ct:null,pl:[],pi:-1,ps:'',ip:false,il:false,rm:'all',isShuffle:false,currentAccentColor:'#f43f5e',autoNext:true,iv:null,pt:0,pd:0,at:'home',ld:{type:'none',lines:[]},cli:-1,lo:false,lyricOffset:0,playbackRate:1.0,sleepSecondsLeft:0,sleepEndWithTrack:false,lyricsTranslate:true};
 
 try{S.playbackRate=parseFloat(localStorage.getItem('hanz_playback_rate'))||1.0;}catch(e){S.playbackRate=1.0;}
 try{var storedAutoNext = localStorage.getItem('hanz_auto_next');if(storedAutoNext!==null){S.autoNext = storedAutoNext==='true';}}catch(e){}
-try{var storedLyricsTranslate = localStorage.getItem('hanz_lyrics_translate');S.lyricsTranslate = storedLyricsTranslate==='true';}catch(e){}
+try{var storedLyricsTranslate = localStorage.getItem('hanz_lyrics_translate');}catch(e){}
+S.lyricsTranslate = true; // terjemahan lirik selalu otomatis
 
 function fm(s){if(isNaN(s))return"0:00";const m=Math.floor(s/60),se=Math.floor(s%60);return m+':'+(se<10?'0':'')+se;}
 function es(t){if(!t)return'';const d=document.createElement('div');d.textContent=t;return d.innerHTML;}
@@ -78,7 +79,25 @@ function renderProgress(){
     }
 }
 
+var _activeRefreshQueued=false;
+// Sinkronkan penanda "sedang diputar / memuat" di semua daftar lagu yang sedang terlihat.
+function refreshActiveLists(){
+    if(_activeRefreshQueued)return;
+    _activeRefreshQueued=true;
+    requestAnimationFrame(function(){
+        _activeRefreshQueued=false;
+        try{
+            if(typeof Home!=='undefined'&&S.at==='home'&&Home.renderActive)Home.renderActive();
+            if(typeof Search!=='undefined'&&S.at==='search'&&Search.renderActive)Search.renderActive();
+            if(typeof Library!=='undefined'&&Library.renderActive)Library.renderActive();
+            if(typeof Artist!=='undefined'&&Artist.renderActive)Artist.renderActive();
+            if(typeof Album!=='undefined'&&Album.renderActive)Album.renderActive();
+        }catch(e){console.error('refreshActiveLists',e);}
+    });
+}
+
 function UB(){
+    refreshActiveLists();
     var mi=gid('mini-play-btn'),fu=gid('full-play-btn');
     var coverOverlay=gid('full-cover-overlay'),coverIcon=gid('full-cover-icon'),coverText=gid('full-cover-text');
     var fullCover=gid('full-cover');
@@ -412,15 +431,6 @@ function SF(){
         showToast(S.isShuffle ? 'Mode acak (Shuffle) diaktifkan' : 'Mode acak (Shuffle) dimatikan');
     }
 }
-function toggleLyricsTranslate(){
-    S.lyricsTranslate = !S.lyricsTranslate;
-    try { localStorage.setItem('hanz_lyrics_translate', S.lyricsTranslate); } catch(e) {}
-    if(typeof showToast === 'function'){
-        showToast(S.lyricsTranslate ? 'Terjemahan lirik diaktifkan' : 'Terjemahan lirik dimatikan');
-    }
-    if(S.ct && S.ct.videoId && typeof FL === 'function') FL(S.ct.videoId);
-}
-
 function shareTrack(){if(!S.ct||!S.ct.videoId)return;var url=location.origin+'/play/'+S.ct.videoId+'?share=true';updateOG(S.ct.title,S.ct.cover);if(navigator.share){navigator.share({title:S.ct.title,text:S.ct.title+' - '+S.ct.artist,url:url}).catch(function(){});}}
 
 function resetLyricsUI(vid){
@@ -496,7 +506,9 @@ async function fetchLyricsFrom(source, vid, translateFlag, lang){
     return await r.json();
 }
 
+var _lyricsReq=0;
 async function FL(vid){
+    var reqId=++_lyricsReq;
     var l=gid('lyrics-loading'),c=gid('lyrics-content'),e=gid('lyrics-empty');
     var il=gid('full-inline-lyrics-loading'),ic=gid('full-inline-lyrics-content'),ie=gid('full-inline-lyrics-empty');
     if(l) l.classList.remove('hidden');
@@ -506,20 +518,28 @@ async function FL(vid){
     if(e) e.classList.add('hidden');
     if(ie) ie.classList.add('hidden');
     S.ld={type:'none',lines:[]};S.cli=-1;S.lyricOffset=0;updateSyncBadge();
+    var showEmpty=function(){
+        if(l)l.classList.add('hidden');if(e)e.classList.remove('hidden');
+        if(il)il.classList.add('hidden');if(ie)ie.classList.remove('hidden');
+    };
+    var hasLines=function(d){return !!(d&&d.status&&d.result&&d.result.lyrics&&d.result.lyrics.lines&&d.result.lyrics.lines.length>0);};
     try{
         var trFlag = S.lyricsTranslate ? '1' : '0';
         var lang = 'id';
-        // Coba lirik.js dulu; kalau belum ada, otomatis fallback ke lyrics1.js.
-        var d = await fetchLyricsFrom('lyrics', vid, trFlag, lang);
-        if(!(d.status && d.result && d.result.lyrics && d.result.lyrics.lines.length>0)){
-            try{ d = await fetchLyricsFrom('lyrics1', vid, trFlag, lang); }catch(e2){}
+        var d = null;
+        // Coba /api/lyrics dulu; kalau gagal atau kosong, fallback ke /api/lyrics1.
+        try{ d = await fetchLyricsFrom('lyrics', vid, trFlag, lang); }catch(e1){ d = null; }
+        if(reqId!==_lyricsReq) return;
+        if(!hasLines(d)){
+            try{ d = await fetchLyricsFrom('lyrics1', vid, trFlag, lang); }catch(e2){ d = null; }
+            if(reqId!==_lyricsReq) return;
         }
-        if(d.status&&d.result.lyrics&&d.result.lyrics.lines.length>0){
+        if(hasLines(d)){
             S.ld=d.result.lyrics;var html='';var inlineHtml='';
             var isPlain = S.ld.type === 'plain';
             S.ld.lines.forEach(function(li,i){
                 var transHtml = '';
-                if (li.translation && li.translation.trim()) {
+                if (S.lyricsTranslate && li.translation && li.translation.trim() && li.translation.trim() !== (li.text||'').trim()) {
                     transHtml = '<span class="lyric-translation">(' + es(li.translation) + ')</span>';
                 }
                 if (isPlain) {
@@ -549,12 +569,10 @@ async function FL(vid){
             S.cli = -2;
             if (!isPlain) ULH(S.pt, true);
         }else{
-            if(l)l.classList.add('hidden');if(e)e.classList.remove('hidden');
-            if(il)il.classList.add('hidden');if(ie)ie.classList.remove('hidden');
+            showEmpty();
         }
     }catch(er){
-        if(l)l.classList.add('hidden');if(e)e.classList.remove('hidden');
-        if(il)il.classList.add('hidden');if(ie)ie.classList.remove('hidden');
+        if(reqId===_lyricsReq) showEmpty();
     }
 }
 
@@ -914,9 +932,25 @@ function createPlaylist(name,image){var pls=getUserPlaylists();var id='pl_'+Date
 function updateUserPlaylist(id,name,image){var pls=getUserPlaylists();var pl=pls.find(function(p){return p.id===id;});if(!pl)return;if(name)pl.name=name;if(image)pl.image=image;saveUserPlaylists(pls);}
 function deleteUserPlaylist(id){var pls=getUserPlaylists().filter(function(p){return p.id!==id;});saveUserPlaylists(pls);}
 function addToPlaylistById(playlistId,track){var pls=getUserPlaylists();var pl=pls.find(function(p){return p.id===playlistId;});if(!pl)return;if(pl.songs.length>=15){showToast('Playlist penuh (Max 15)');return;}var exists=pl.songs.find(function(s){return s.videoId===track.videoId;});if(!exists){pl.songs.push({id:track.id,videoId:track.videoId,title:track.title,artist:track.artist,cover:track.cover,artistId:track.artistId||'',ytUrl:track.ytUrl});if(!pl.image&&pl.songs.length===1){pl.image=track.cover;}saveUserPlaylists(pls);showToast('Ditambahkan ke '+pl.name);}else{showToast('Sudah ada di playlist');}}
-function showToast(msg){var toast=document.createElement('div');toast.className='fixed bottom-24 left-1/2 -translate-x-1/2 bg-white text-black font-bold px-5 py-2.5 rounded-full z-[999]';toast.style.animation='slideUp 0.3s ease-out forwards';toast.innerText=msg;document.body.appendChild(toast);setTimeout(function(){toast.remove();},2000);}
+function showToast(msg){var toast=document.createElement('div');toast.className='fixed bottom-24 left-1/2 -translate-x-1/2 bg-white text-black font-bold px-5 py-2.5 rounded-full z-[10000] max-w-[90vw] text-center text-sm';toast.style.animation='slideUp 0.3s ease-out forwards';toast.innerText=msg;document.body.appendChild(toast);setTimeout(function(){toast.remove();},2000);}
 function addCurrentToPlaylist(){if(!S.ct)return;var pls=getUserPlaylists();if(pls.length===0){showToast('Belum ada playlist! Buat di Library dulu');return;}showPlaylistPicker(S.ct);}
-function showPlaylistPicker(track){var pls=getUserPlaylists();var popup=document.createElement('div');popup.className='fixed inset-0 z-[300] flex items-end justify-center bg-black/60';popup.onclick=function(e){if(e.target===popup)popup.remove();};var listHtml=pls.map(function(p){return'<button onclick="addToPlaylistById(\''+p.id+'\',S.ct);this.parentElement.parentElement.remove();" class="w-full text-left p-4 hover:bg-white/5 flex items-center gap-3 border-b border-[#2a2a2a]"><img src="'+(p.image||(p.songs.length>0?p.songs[0].cover:FI))+'" class="w-10 h-10 rounded object-cover" /><div><p class="font-medium text-white">'+p.name+'</p><p class="text-[#6b7280] text-xs">'+p.songs.length+' lagu</p></div></button>';}).join('');popup.innerHTML='<div class="bg-[#1a1a1a] w-full max-w-md rounded-t-3xl p-6 border-t border-[#333333]" style="animation:slideUp 0.3s ease-out forwards;"><div class="w-10 h-1 bg-white/20 rounded-full mx-auto mb-4"></div><h3 class="font-bold text-white mb-3">Tambah ke Playlist</h3><div class="max-h-72 overflow-y-auto hide-scrollbar">'+listHtml+'</div><button onclick="this.parentElement.parentElement.remove()" class="w-full mt-3 py-3 border border-[#3a3a3a] text-white rounded-full">Batal</button></div>';document.body.appendChild(popup);}
+function showPlaylistPicker(track){
+    if(!track||!track.videoId){showToast('Lagu tidak valid');return;}
+    var pls=getUserPlaylists();
+    if(pls.length===0){showToast('Belum ada playlist! Buat di Library dulu');return;}
+    var popup=document.createElement('div');
+    popup.className='fixed inset-0 z-[300] flex items-end justify-center bg-black/60';
+    popup.onclick=function(e){if(e.target===popup)popup.remove();};
+    var listHtml=pls.map(function(p){
+        return '<button data-pl="'+es(p.id)+'" class="pl-pick w-full text-left p-4 hover:bg-white/5 flex items-center gap-3 border-b border-[#2a2a2a]"><img src="'+(p.image||(p.songs.length>0?p.songs[0].cover:FI))+'" class="w-10 h-10 rounded object-cover" onerror="this.src=\''+FI+'\'" /><div><p class="font-medium text-white">'+es(p.name)+'</p><p class="text-[#6b7280] text-xs">'+p.songs.length+' lagu</p></div></button>';
+    }).join('');
+    popup.innerHTML='<div class="bg-[#1a1a1a] w-full max-w-md rounded-t-3xl p-6 border-t border-[#333333]" style="animation:slideUp 0.3s ease-out forwards;"><div class="w-10 h-1 bg-white/20 rounded-full mx-auto mb-4"></div><h3 class="font-bold text-white mb-3">Tambah ke Playlist</h3><div class="max-h-72 overflow-y-auto hide-scrollbar">'+listHtml+'</div><button class="pl-cancel w-full mt-3 py-3 border border-[#3a3a3a] text-white rounded-full">Batal</button></div>';
+    popup.querySelectorAll('.pl-pick').forEach(function(btn){
+        btn.onclick=function(){addToPlaylistById(btn.getAttribute('data-pl'),track);popup.remove();};
+    });
+    popup.querySelector('.pl-cancel').onclick=function(){popup.remove();};
+    document.body.appendChild(popup);
+}
 
 var audioCtx = null;
 var sourceNode = null;

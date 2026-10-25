@@ -169,9 +169,11 @@ var Search={
             var url=location.origin+'/search/'+encodeURIComponent(S.sq);
             history.pushState({},'',url);
             Search.show(true);
+            var myQ=S.sq;
             try{
                 var r=await fetch(API.search+'?query='+encodeURIComponent(S.sq)+'&type=all');
                 var d=await r.json();
+                if(myQ!==S.sq)return;
                 S.ar=d.status&&d.result.songs?d.result.songs.map(function(s){return{id:s.videoId,videoId:s.videoId,title:cn(s.title),artist:cn(s.artist),artistId:s.artistId||'',cover:toHDCover(s.thumbnail,s.videoId),ytUrl:s.url};}):[];
                 
                 var pl = d.status&&d.result.playlists?d.result.playlists:[];
@@ -183,7 +185,7 @@ var Search={
                 S.filter = 'songs';
                 Search.updateFilterUI();
                 Search.apply();
-            }catch(e){S.ar=[];S.pr=[];Search.show();}
+            }catch(e){if(myQ!==S.sq)return;S.ar=[];S.pr=[];S.art=[];S.sr=[];gid('filter-tabs').classList.remove('hidden');Search.show();}
         });
         si.addEventListener('input',function(){
             var q=this.value.trim();
@@ -191,12 +193,12 @@ var Search={
             fetch(API.suggest+'?q='+encodeURIComponent(q)).then(function(r){return r.json();}).then(function(s){
                 if(Array.isArray(s)&&s.length>0){
                     gid('suggestions').innerHTML=s.map(function(sg, i){
-                        return'<div onclick="selectSuggestion(\''+es(sg).replace(/'/g,"\\'")+'\')" class="px-4 py-3 hover:bg-white/10 cursor-pointer text-sm animate-card-left flex items-center gap-3 transition-colors" style="animation-delay:'+Math.min(i*25, 250)+'ms"><i data-lucide="search" class="w-3.5 h-3.5 text-white/70"></i><span>'+es(sg)+'</span></div>';
+                        return'<div onclick="selectSuggestion(\''+esJs(sg)+'\')" class="px-4 py-3 hover:bg-white/10 cursor-pointer text-sm animate-card-left flex items-center gap-3 transition-colors" style="animation-delay:'+Math.min(i*25, 250)+'ms"><i data-lucide="search" class="w-3.5 h-3.5 text-white/70"></i><span>'+es(sg)+'</span></div>';
                     }).join('');
                     gid('suggestions').classList.remove('hidden');
                     lucide.createIcons();
                 }else{gid('suggestions').classList.add('hidden');}
-            });
+            }).catch(function(){gid('suggestions').classList.add('hidden');});
         });
         document.addEventListener('click',function(e){if(!e.target.closest('#search-form')&&!e.target.closest('#suggestions'))gid('suggestions').classList.add('hidden');});
     },
@@ -250,12 +252,12 @@ var Search={
             lucide.createIcons();
         } else if (S.filter === 'artists') {
             c.innerHTML='<div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 pb-8">'+S.sr.map(function(p, i){
-                return '<div onclick="Artist.open(\''+p.id+'\', \''+esJs(p.name||p.title)+'\')" class="cursor-pointer active:scale-95 animate-card-up" style="animation-delay:'+Math.min(i*40, 500)+'ms"><div class="w-full aspect-square mb-2 relative rounded-full overflow-hidden glass-edge "><img src="'+(p.cover||FI)+'" class="w-full h-full object-cover" onerror="this.src=\''+FI+'\'" /></div><h3 class="font-semibold text-center text-sm truncate">'+es(p.name||p.title)+'</h3><p class="text-white/70 text-center text-xs truncate mt-0.5">'+es(p.subtitle||p.artist)+'</p></div>';
+                return '<div onclick="Artist.open(\''+esJs(p.id)+'\', \''+esJs(p.name||p.title)+'\')" class="cursor-pointer active:scale-95 animate-card-up" style="animation-delay:'+Math.min(i*40, 500)+'ms"><div class="w-full aspect-square mb-2 relative rounded-full overflow-hidden glass-edge "><img src="'+(p.cover||FI)+'" class="w-full h-full object-cover" onerror="this.src=\''+FI+'\'" /></div><h3 class="font-semibold text-center text-sm truncate">'+es(p.name||p.title)+'</h3><p class="text-white/70 text-center text-xs truncate mt-0.5">'+es(p.subtitle||p.artist)+'</p></div>';
             }).join('')+'</div>';
             lucide.createIcons();
         } else {
             c.innerHTML='<div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 pb-8">'+S.sr.map(function(p, i){
-                return '<div onclick="Album.open(\''+p.id+'\', \''+(p.cover||FI)+'\')" class="cursor-pointer active:scale-95 animate-card-up" style="animation-delay:'+Math.min(i*40, 500)+'ms"><div class="w-full aspect-square mb-2 relative rounded-xl overflow-hidden glass-edge "><img src="'+(p.cover||FI)+'" class="w-full h-full object-cover" onerror="this.src=\''+FI+'\'" /></div><h3 class="font-semibold text-sm truncate">'+es(p.title)+'</h3><p class="text-white/70 text-xs truncate mt-0.5">'+es(p.artist)+'</p></div>';
+                return '<div onclick="Album.open(\''+esJs(p.id)+'\', \''+esJs(p.cover||FI)+'\')" class="cursor-pointer active:scale-95 animate-card-up" style="animation-delay:'+Math.min(i*40, 500)+'ms"><div class="w-full aspect-square mb-2 relative rounded-xl overflow-hidden glass-edge "><img src="'+(p.cover||FI)+'" class="w-full h-full object-cover" onerror="this.src=\''+FI+'\'" /></div><h3 class="font-semibold text-sm truncate">'+es(p.title)+'</h3><p class="text-white/70 text-xs truncate mt-0.5">'+es(p.artist)+'</p></div>';
             }).join('')+'</div>';
             lucide.createIcons();
         }

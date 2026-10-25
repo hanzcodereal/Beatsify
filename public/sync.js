@@ -2,31 +2,54 @@
 // supaya data tidak hilang saat logout lalu login kembali. Saat belum login (guest),
 // data tetap disimpan di localStorage seperti biasa.
 var DataSync = {
-    _pushTimers: {},
+    _pending: {},
+    _timer: null,
+    _userId: null,
 
     push(field, value) {
-        if (!Auth || !Auth.isLoggedIn || !window.sb) return;
-        var userId = Auth.user.id;
-        clearTimeout(DataSync._pushTimers[field]);
-        DataSync._pushTimers[field] = setTimeout(async function () {
-            try {
-                var row = {}; row.user_id = userId; row[field] = value; row.updated_at = new Date().toISOString();
-                await sb.from('user_data').upsert(row, { onConflict: 'user_id' });
-            } catch (e) { console.error('Gagal sinkron ' + field + ':', e); }
-        }, 600);
+        if (typeof Auth === 'undefined' || !Auth.isLoggedIn || !window.sb) return;
+        DataSync._userId = Auth.user.id;
+        DataSync._pending[field] = value;
+        clearTimeout(DataSync._timer);
+        DataSync._timer = setTimeout(DataSync.flush, 600);
+    },
+
+    // Kirim semua perubahan yang tertunda dalam satu permintaan.
+    async flush() {
+        clearTimeout(DataSync._timer);
+        DataSync._timer = null;
+        var fields = Object.keys(DataSync._pending);
+        if (!fields.length || !DataSync._userId || !window.sb) return;
+        var row = { user_id: DataSync._userId, updated_at: new Date().toISOString() };
+        fields.forEach(function (f) { row[f] = DataSync._pending[f]; });
+        DataSync._pending = {};
+        try {
+            var res = await sb.from('user_data').upsert(row, { onConflict: 'user_id' });
+            if (res && res.error) throw res.error;
+        } catch (e) {
+            console.error('Gagal sinkron data akun:', e);
+            // Kembalikan ke antrean supaya dicoba lagi pada perubahan berikutnya
+            fields.forEach(function (f) { if (!(f in DataSync._pending)) DataSync._pending[f] = row[f]; });
+        }
     },
 
     async onLogin() {
         if (!Auth.isLoggedIn || !window.sb) return;
         try {
-            var { data: row } = await sb.from('user_data').select('*').eq('user_id', Auth.user.id).maybeSingle();
+            var res = await sb.from('user_data').select('*').eq('user_id', Auth.user.id).maybeSingle();
+            // Jika gagal membaca (jaringan/server), JANGAN menimpa data di server dengan data lokal yang mungkin kosong.
+            if (res.error) throw res.error;
+            var row = res.data;
             if (row) {
-                localStorage.setItem('hanz_liked_songs', JSON.stringify(row.liked_songs || []));
-                localStorage.setItem('hanz_liked_artists', JSON.stringify(row.liked_artists || []));
-                localStorage.setItem('hanz_playlists', JSON.stringify(row.playlists || []));
-                localStorage.setItem('hanz_history', JSON.stringify(row.history || []));
+                // Ada perubahan lokal yang belum terkirim? Kirim dulu, jangan ditimpa data server yang lama.
+                var pend = DataSync._pending;
+                var map = { liked_songs: 'hanz_liked_songs', liked_artists: 'hanz_liked_artists', playlists: 'hanz_playlists', history: 'hanz_history' };
+                Object.keys(map).forEach(function (f) {
+                    if (f in pend) return;
+                    localStorage.setItem(map[f], JSON.stringify(row[f] || []));
+                });
             } else {
-                // Belum ada data di server: migrasikan data lokal (guest) yang sudah ada ke akun ini
+                // Belum ada data di server: migrasikan data lokal yang sudah ada ke akun ini
                 await sb.from('user_data').upsert({
                     user_id: Auth.user.id,
                     liked_songs: getLikedSongs(),
@@ -75,3 +98,9 @@ var DataSync = {
     var _clearPlayHistory = clearPlayHistory;
     clearPlayHistory = function () { _clearPlayHistory(); DataSync.push('history', []); };
 })();
+
+// Simpan perubahan terakhir saat tab ditutup / disembunyikan
+document.addEventListener('visibilitychange', function () {
+    if (document.visibilityState === 'hidden') DataSync.flush();
+});
+window.addEventListener('pagehide', function () { DataSync.flush(); });

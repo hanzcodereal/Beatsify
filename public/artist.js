@@ -53,7 +53,14 @@ var Artist={
             </div>
         </div>`;
 
-        fetch(API.artist + '?id=' + id).then(function(r){return r.json();}).then(function(d){
+        var showArtistError=function(){
+            if(Artist.currentArtistId!==id)return;
+            var inner=gid('artist-inner-content');
+            if(inner)inner.innerHTML='<div class="text-center text-white/70 py-10 px-6"><p class="font-bold text-white mb-1">Gagal memuat artis</p><p class="text-xs mb-4">Periksa koneksi internet lalu coba lagi.</p><button onclick="Artist.open(\''+esJs(id)+'\', \''+esJs(name||'')+'\')" class="btn-chrome px-5 py-2 rounded-full text-xs font-bold active:scale-95">Coba Lagi</button></div>';
+        };
+        fetch(API.artist + '?id=' + encodeURIComponent(id)).then(function(r){return r.json();}).then(function(d){
+            if(Artist.currentArtistId!==id)return;
+            if(!(d.status && d.result)){showArtistError();return;}
             if(d.status && d.result){
                 var a = d.result;
                 if(a.name) gid('artist-name').innerText = a.name;
@@ -252,7 +259,7 @@ var Artist={
                 gid('artist-content').innerHTML = fullHtml + html;
                 lucide.createIcons();
             }
-        });
+        }).catch(showArtistError);
     },
     currentArtistData: null,
     renderActive() {

@@ -190,7 +190,7 @@ var App={
     }
 };
 var _splashStartTime = Date.now();
-function startBeatsifyApp(){ App.init(); Home.fetch(); }
+function startBeatsifyApp(){ App.init(); }
 window.startBeatsifyApp = startBeatsifyApp;
 
 function hideSplashScreen(){
@@ -304,7 +304,7 @@ var Library={
                         iconOverlay = '<i data-lucide="play" class="w-5 h-5 text-white fill-white"></i>';
                     }
 
-                    var rowBg = isPlay ? 'bg-gradient-to-r from-rose-500/20 via-rose-500/10 to-transparent border border-rose-500/30 shadow-md' : (isCur ? 'bg-white/10 border border-[#3a3a3a]' : 'hover:bg-white/5 border border-transparent hover:border-[#2a2a2a]');
+                    var rowBg = isPlay ? 'bg-gradient-to-r from-rose-500/20 via-rose-500/10 to-transparent border border-rose-500/30 shadow-md' : (isCur ? 'bg-white/10 border border-[#4a4a4a]' : 'bg-black border border-[#3a3a3a] hover:bg-white/5');
                     var titleClass = isCur ? 'text-rose-400 font-bold' : 'text-white font-bold';
 
                     html += '<div class="flex items-center gap-3 p-2.5 rounded-2xl active:scale-[0.99] transition-all group ' + rowBg + '">' +
@@ -425,7 +425,7 @@ var Library={
                         iconOverlay = '<i data-lucide="play" class="w-5 h-5 text-white fill-white"></i>';
                     }
 
-                    var rowBg = isPlay ? 'bg-gradient-to-r from-emerald-500/20 via-emerald-500/10 to-transparent border border-emerald-500/30 shadow-md' : (isCur ? 'bg-white/10 border border-[#3a3a3a]' : 'hover:bg-white/5 border border-transparent hover:border-[#2a2a2a]');
+                    var rowBg = isPlay ? 'bg-gradient-to-r from-emerald-500/20 via-emerald-500/10 to-transparent border border-emerald-500/30 shadow-md' : (isCur ? 'bg-white/10 border border-[#4a4a4a]' : 'bg-black border border-[#3a3a3a] hover:bg-white/5');
                     var titleClass = isCur ? 'text-emerald-400 font-bold' : 'text-white font-bold';
 
                     html += '<div class="flex items-center gap-3 p-2.5 rounded-2xl active:scale-[0.99] transition-all group ' + rowBg + '">' +
@@ -623,7 +623,7 @@ var Library={
                     iconOverlay = '<i data-lucide="play" class="w-4 h-4 text-white fill-white"></i>';
                 }
 
-                var rowBg = isPlay ? 'bg-gradient-to-r from-rose-500/20 via-rose-500/10 to-transparent border border-rose-500/30 shadow-md' : (isCur ? 'bg-white/10 border border-[#3a3a3a]' : 'hover:bg-white/5 border border-transparent');
+                var rowBg = isPlay ? 'bg-gradient-to-r from-rose-500/20 via-rose-500/10 to-transparent border border-rose-500/30 shadow-md' : (isCur ? 'bg-white/10 border border-[#4a4a4a]' : 'bg-black border border-[#3a3a3a] hover:bg-white/5');
                 var titleClass = isCur ? 'text-rose-400 font-bold' : 'text-white font-medium';
 
                 html+='<div class="flex items-center gap-2 p-2 rounded-lg active:scale-[0.98] ' + rowBg + '"><div onclick="Library.playSong(\''+id+'\','+i+')" class="flex items-center gap-3 flex-1 cursor-pointer overflow-hidden"><div class="relative w-10 h-10 rounded overflow-hidden shrink-0"><img src="'+s.cover+'" class="w-full h-full object-cover" onerror="this.src=\'' + FI + '\'" /><div class="absolute inset-0 bg-black/80 ' + (isCur ? 'opacity-100' : 'opacity-0 group-hover:opacity-100') + ' transition-all flex items-center justify-center">' + iconOverlay + '</div></div><div class="truncate flex-1 min-w-0"><p class="text-sm truncate ' + titleClass + '">'+es(s.title)+'</p><p class="text-white/70 text-xs truncate">'+es(s.artist)+'</p></div></div><button onclick="Library.removeSong(\''+id+'\','+i+')" class="text-white/70 hover:text-red-400 p-2 active:scale-90 shrink-0" title="Hapus"><i data-lucide="x" class="w-5 h-5"></i></button></div>';
@@ -643,9 +643,8 @@ var Library={
         if (S.at === 'library') Library.render();
     },
     renderActive() {
-        if (S.at === 'library' && S.libTab === 'liked') {
+        if (S.at === 'library' && (Library.activeTab === 'liked' || Library.activeTab === 'history')) {
             Library.render();
-            return;
         }
         var modal = gid('library-modal');
         if (!modal || modal.style.display === 'none' || !Library.currentPlaylistId) return;
@@ -685,7 +684,7 @@ var Library={
                 coverOverlay.className = 'absolute inset-0 bg-black/80 ' + (isCur ? 'opacity-100' : 'opacity-0 group-hover:opacity-100') + ' transition-all flex items-center justify-center';
             }
 
-            var rowBg = isPlay ? 'bg-gradient-to-r from-rose-500/20 via-rose-500/10 to-transparent border border-rose-500/30 shadow-md' : (isCur ? 'bg-white/10 border border-[#3a3a3a]' : 'hover:bg-white/5 border border-transparent');
+            var rowBg = isPlay ? 'bg-gradient-to-r from-rose-500/20 via-rose-500/10 to-transparent border border-rose-500/30 shadow-md' : (isCur ? 'bg-white/10 border border-[#4a4a4a]' : 'bg-black border border-[#3a3a3a] hover:bg-white/5');
             el.className = 'flex items-center gap-2 p-2 rounded-lg active:scale-[0.98] ' + rowBg;
 
             var titleEl = el.querySelector('p');

@@ -304,10 +304,6 @@ var FullPlayer={
                     <i data-lucide="user" class="w-5 h-5 text-white"></i>
                     <span class="text-xs font-semibold text-white/90">Lihat Artis</span>
                 </button>
-                <button onclick="toggleLyricsTranslate(); gid('full-more-sheet').remove();" class="flex flex-col items-center gap-1.5 p-3 rounded-2xl bg-white/5 hover:bg-white/10 active:scale-95 transition cursor-pointer" style="opacity: ${S.lyricsTranslate ? '1' : '0.5'};">
-                    <i data-lucide="languages" class="w-5 h-5 ${S.lyricsTranslate ? 'text-rose-400' : 'text-white'}"></i>
-                    <span class="text-xs font-semibold ${S.lyricsTranslate ? 'text-rose-400' : 'text-white/90'}">Terjemahan</span>
-                </button>
             </div>
 
             <button onclick="gid('full-more-sheet').remove()" class="w-full mt-2 py-3 bg-white/10 text-white font-bold rounded-full border border-[#333333] active:scale-95 transition cursor-pointer">Tutup</button>

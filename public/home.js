@@ -164,7 +164,9 @@ var Home = {
         Home.fetchCategoryData(catName);
     },
 
+    _catReq: 0,
     async fetchCategoryData(catName) {
+        var reqId = ++Home._catReq;
         var defView = gid('home-default-view'), catView = gid('home-category-view');
         if (defView) defView.style.display = 'none';
         if (catView) {
@@ -220,8 +222,9 @@ var Home = {
                 S.hcp = [].concat(d.result.playlists || []).concat(d.result.albums || []);
                 S.hca = d.result.artists || [];
             }
-        } catch(e) { S.hc = []; S.hcp = []; S.hca = []; }
+        } catch(e) { if (reqId === Home._catReq) { S.hc = []; S.hcp = []; S.hca = []; } }
 
+        if (reqId !== Home._catReq || Home.activeCategory !== catName) return;
         Home.displayCategoryView();
     },
 
@@ -272,14 +275,14 @@ var Home = {
         var plistHtml = '';
         if (S.hcp && S.hcp.length > 0) {
             plistHtml = S.hcp.slice(0, 10).map(function(p, i) {
-                return '<div onclick="Album.open(\''+p.id+'\', \''+(p.cover||FI)+'\')" class="flex-shrink-0 w-36 cursor-pointer active:scale-95 animate-card-left" style="animation-delay:'+Math.min(i*40, 400)+'ms"><div class="w-36 h-36 mb-2 relative rounded-xl overflow-hidden glass-edge "><img src="'+(p.cover||FI)+'" class="w-full h-full object-cover" onerror="this.src=\''+FI+'\'" /></div><h3 class="font-semibold text-xs truncate">'+es(p.title)+'</h3><p class="text-white/70 text-[10px] truncate mt-0.5">'+es(p.artist)+'</p></div>';
+                return '<div onclick="Album.open(\''+esJs(p.id)+'\', \''+esJs(p.cover||FI)+'\')" class="flex-shrink-0 w-36 cursor-pointer active:scale-95 animate-card-left" style="animation-delay:'+Math.min(i*40, 400)+'ms"><div class="w-36 h-36 mb-2 relative rounded-xl overflow-hidden glass-edge "><img src="'+(p.cover||FI)+'" class="w-full h-full object-cover" onerror="this.src=\''+FI+'\'" /></div><h3 class="font-semibold text-xs truncate">'+es(p.title)+'</h3><p class="text-white/70 text-[10px] truncate mt-0.5">'+es(p.artist)+'</p></div>';
             }).join('');
         }
 
         var artistsHtml = '';
         if (S.hca && S.hca.length > 0) {
             artistsHtml = S.hca.slice(0, 8).map(function(p, i) {
-                return '<div onclick="Artist.open(\''+p.id+'\', \''+esJs(p.name||p.title)+'\')" class="flex-shrink-0 w-28 cursor-pointer active:scale-95 animate-card-left" style="animation-delay:'+Math.min(i*40, 400)+'ms"><div class="w-28 h-28 mb-2 relative rounded-full overflow-hidden glass-edge "><img src="'+(p.cover||FI)+'" class="w-full h-full object-cover" onerror="this.src=\''+FI+'\'" /></div><h3 class="font-semibold text-center text-xs truncate">'+es(p.name||p.title)+'</h3></div>';
+                return '<div onclick="Artist.open(\''+esJs(p.id)+'\', \''+esJs(p.name||p.title)+'\')" class="flex-shrink-0 w-28 cursor-pointer active:scale-95 animate-card-left" style="animation-delay:'+Math.min(i*40, 400)+'ms"><div class="w-28 h-28 mb-2 relative rounded-full overflow-hidden glass-edge "><img src="'+(p.cover||FI)+'" class="w-full h-full object-cover" onerror="this.src=\''+FI+'\'" /></div><h3 class="font-semibold text-center text-xs truncate">'+es(p.name||p.title)+'</h3></div>';
             }).join('');
         }
 
@@ -351,7 +354,15 @@ var Home = {
         };
     },
 
-    async fetch() {
+    _fetching: null,
+    fetch() {
+        // Hindari permintaan ganda saat start (render + switch memanggil fetch bersamaan)
+        if (Home._fetching) return Home._fetching;
+        Home._fetching = Home._doFetch().finally(function() { Home._fetching = null; });
+        return Home._fetching;
+    },
+
+    async _doFetch() {
         Home.showSkeleton();
         try {
             var r = await fetch(API.home);
@@ -468,7 +479,7 @@ var Home = {
         plHtml += '<div onclick="if(typeof Library !== \'undefined\') Library.createNew()" class="flex-shrink-0 w-40 cursor-pointer active:scale-95 flex flex-col"><div class="w-40 h-40 mb-2 relative rounded-xl overflow-hidden glass flex flex-col items-center justify-center border border-dashed border-[#3a3a3a] hover:border-[#4a4a4a]"><i data-lucide="plus" class="w-8 h-8 text-white/70"></i><span class="text-xs text-white/70 mt-2">Buat Playlist</span></div><h3 class="font-semibold text-sm truncate text-white/70">Buat Baru</h3></div>';
 
         var coverCard = function(p, i, offset) {
-            return '<div onclick="Album.open(\''+esJs(p.id)+'\', \''+(p.cover||FI)+'\')" class="flex-shrink-0 w-40 cursor-pointer active:scale-95 animate-stagger" style="animation-delay:'+((i+offset)*50)+'ms"><div class="w-40 h-40 mb-2 relative rounded-xl overflow-hidden glass-edge"><img src="'+(p.cover||FI)+'" class="w-full h-full object-cover" onerror="this.src=\''+FI+'\'" /></div><h3 class="font-semibold text-sm truncate">'+es(p.title)+'</h3><p class="text-white/70 text-xs truncate mt-1">'+es(p.artist)+'</p></div>';
+            return '<div onclick="Album.open(\''+esJs(p.id)+'\', \''+esJs(p.cover||FI)+'\')" class="flex-shrink-0 w-40 cursor-pointer active:scale-95 animate-stagger" style="animation-delay:'+((i+offset)*50)+'ms"><div class="w-40 h-40 mb-2 relative rounded-xl overflow-hidden glass-edge"><img src="'+(p.cover||FI)+'" class="w-full h-full object-cover" onerror="this.src=\''+FI+'\'" /></div><h3 class="font-semibold text-sm truncate">'+es(p.title)+'</h3><p class="text-white/70 text-xs truncate mt-1">'+es(p.artist)+'</p></div>';
         };
 
         if (S.hp && S.hp.length > 0) {
