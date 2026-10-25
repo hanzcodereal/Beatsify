@@ -1,4 +1,4 @@
-const { getLyrics1 } = require('./lyrics1.js');
+const { getLyrics1, isTranslateRequested } = require('./lyrics1.js');
 const { getLyrics2 } = require('../lib/lyrics2.js');
 
 const lyricsCache = new Map();
@@ -12,14 +12,16 @@ module.exports = async (req, res) => {
     const artist = (req.query.artist || req.body?.artist || '').trim();
     if (!videoId) { res.status(400).json({ status: false, message: 'Parameter id wajib diisi' }); return; }
 
-    const cached = lyricsCache.get(videoId);
+    const translate = isTranslateRequested(req);
+    const cacheKey = videoId + (translate ? ':t' : '');
+    const cached = lyricsCache.get(cacheKey);
     if (cached && cached.expireAt > Date.now()) {
         return res.status(200).json(cached.data);
     }
 
     try {
 
-        const data1 = await getLyrics1(videoId, title, artist).catch(() => null);
+        const data1 = await getLyrics1(videoId, title, artist, translate).catch(() => null);
         if (data1 && data1.lyrics && data1.lyrics.lines && data1.lyrics.lines.length > 0) {
             const payload = {
                 status: true,
@@ -33,12 +35,12 @@ module.exports = async (req, res) => {
                     lyrics: data1.lyrics
                 }
             };
-            lyricsCache.set(videoId, { data: payload, expireAt: Date.now() + CACHE_TTL });
+            lyricsCache.set(cacheKey, { data: payload, expireAt: Date.now() + CACHE_TTL });
             res.status(200).json(payload);
             return;
         }
 
-        const data2 = await getLyrics2(videoId).catch(() => null);
+        const data2 = await getLyrics2(videoId, translate).catch(() => null);
         if (data2 && data2.lyrics && data2.lyrics.lines && data2.lyrics.lines.length > 0) {
             res.status(200).json({
                 status: true,

@@ -57,7 +57,7 @@ function cleanA(a) {
     return a.replace(/- Topic/gi, '').replace(/\s+/g, ' ').trim();
 }
 
-async function getLyrics1(videoId, queryTitle = '', queryArtist = '') {
+async function getLyrics1(videoId, queryTitle = '', queryArtist = '', translate = true) {
     let title = (queryTitle || '').trim();
     let artist = (queryArtist || '').trim();
     let album = '';
@@ -144,7 +144,7 @@ async function getLyrics1(videoId, queryTitle = '', queryArtist = '') {
         } catch (e) {}
     }
 
-    if (lyricsData.lines && lyricsData.lines.length > 0) {
+    if (translate && lyricsData.lines && lyricsData.lines.length > 0) {
         try {
             const transPromise = translateLines(lyricsData.lines, 'id');
             const timeoutPromise = new Promise(resolve => setTimeout(() => resolve(lyricsData.lines), 10000));
@@ -153,6 +153,11 @@ async function getLyrics1(videoId, queryTitle = '', queryArtist = '') {
     }
 
     return { videoId, title: title || cTitle, artist: artist || cArtist, album, lyrics: lyricsData };
+}
+
+function isTranslateRequested(req) {
+    const v = String((req.query && req.query.translate) || (req.body && req.body.translate) || '').toLowerCase();
+    return v === '1' || v === 'true';
 }
 
 const handler = async (req, res) => {
@@ -164,7 +169,8 @@ const handler = async (req, res) => {
     if (!videoId) { res.status(400).json({ status: false, message: 'Parameter id wajib diisi' }); return; }
 
     try {
-        const result = await getLyrics1(videoId, title, artist);
+        const translate = isTranslateRequested(req);
+        const result = await getLyrics1(videoId, title, artist, translate);
         res.status(200).json({ status: true, source: 'lrclib', result });
     } catch(e) {
         res.status(500).json({ status: false, message: e.message });
@@ -172,4 +178,5 @@ const handler = async (req, res) => {
 };
 
 handler.getLyrics1 = getLyrics1;
+handler.isTranslateRequested = isTranslateRequested;
 module.exports = handler;
