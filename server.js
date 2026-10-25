@@ -1,7 +1,5 @@
 const express = require('express');
 const path = require('path');
-const https = require('https');
-const http = require('http');
 const fs = require('fs');
 
 const app = express();
@@ -11,7 +9,7 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use((req, res, next) => {
     res.header('Access-Control-Allow-Origin', '*');
-    res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+    res.header('Access-Control-Allow-Methods', 'GET, POST, DELETE, OPTIONS');
     res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
     if (req.method === 'OPTIONS') {
         return res.sendStatus(200);
@@ -36,49 +34,7 @@ app.get('/admin', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'admin.html'));
 });
 
-app.get('/api/proxy-audio', (req, res) => {
-    const targetUrl = req.query.url;
-    if (!targetUrl) return res.status(400).send('Missing url parameter');
-    
-    let parsed;
-    try {
-        parsed = new URL(targetUrl);
-    } catch (e) {
-        return res.status(400).send('Invalid url parameter');
-    }
-
-    const options = {
-        headers: {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/149.0.0.0 Safari/537.36'
-        }
-    };
-    if (req.headers.range) {
-        options.headers['Range'] = req.headers.range;
-    }
-
-    const client = parsed.protocol === 'https:' ? https : http;
-    const proxyReq = client.get(targetUrl, options, (proxyRes) => {
-        if (proxyRes.statusCode >= 300 && proxyRes.statusCode < 400 && proxyRes.headers.location) {
-            req.query.url = proxyRes.headers.location;
-            return app._router.handle(req, res);
-        }
-
-        res.status(proxyRes.statusCode);
-        const passthrough = ['content-type', 'content-length', 'accept-ranges', 'content-range'];
-        passthrough.forEach(h => {
-            if (proxyRes.headers[h]) res.setHeader(h, proxyRes.headers[h]);
-        });
-        if (!res.getHeader('accept-ranges')) res.setHeader('Accept-Ranges', 'bytes');
-        
-        proxyRes.pipe(res);
-    });
-    
-    proxyReq.on('error', (err) => {
-        if (!res.headersSent) {
-            res.status(500).send('Proxy error: ' + err.message);
-        }
-    });
-});
+app.all('/api/proxy-audio', require('./api/proxy-audio.js'));
 
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -88,7 +44,8 @@ app.use((req, res) => {
     if (req.path.startsWith('/play/')) {
         const videoId = req.path.split('/play/')[1];
         if (videoId) {
-            const cleanVideoId = videoId.split('?')[0].split('/')[0];
+            const cleanVideoId = videoId.split('?')[0].split('/')[0].replace(/[^A-Za-z0-9_-]/g, '').slice(0, 20);
+            if (!cleanVideoId) return res.sendFile(filePath);
             const coverUrl = `https://i.ytimg.com/vi/${cleanVideoId}/hqdefault.jpg`;
             const playTitle = `Dengarkan Musik - Beatsify`;
             const playDesc = `Dengarkan lagu favoritmu di Beatsify Web Music Player`;
