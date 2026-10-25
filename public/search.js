@@ -21,10 +21,10 @@ var Search={
         }
     },
     onShow(){if(!S.sq){Search.renderRecs();}},
-    REC_ROWS:[{key:'rec0',label:'Rilis Anyar',q:'baru rilis'},{key:'rec1',label:'Barat Top',q:'barat Top'},{key:'rec2',label:'Rap',q:'Rap Top'}],
+    REC_ROWS:[{key:'rec0',label:'Pop Indo Hits',q:'lagu pop indonesia hits terpopuler'},{key:'rec1',label:'Lagu Galau Indonesia',q:'lagu galau indonesia viral'},{key:'rec2',label:'Dangdut & Koplo Viral',q:'dangdut koplo terbaru viral'},{key:'rec3',label:'Akustik Santai Indo',q:'akustik santai indonesia lofi'}],
     renderRecs(){
         var rc=gid('search-recs');if(!rc)return;
-        if(S.rec0&&S.rec1&&S.rec2){Search.showRecs();return;}
+        if(S.rec0&&S.rec1&&S.rec2&&S.rec3){Search.showRecs();return;}
         rc.innerHTML=Search.REC_ROWS.map(function(row){
             return '<div><div class="h-5 w-32 bg-white/10 rounded mb-3 animate-pulse"></div><div class="flex gap-3 overflow-x-auto hide-scrollbar pb-1">'+
                 Array(4).fill(0).map(function(){return '<div class="flex-shrink-0 w-32 animate-pulse"><div class="w-32 h-32 rounded-xl bg-white/5 mb-2"></div><div class="h-3 bg-white/10 rounded w-3/4"></div></div>';}).join('')+

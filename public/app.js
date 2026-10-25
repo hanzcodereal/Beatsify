@@ -3,33 +3,7 @@ var App={
         document.documentElement.classList.remove('theme-light');
         localStorage.removeItem('theme');
 
-        gid('nav-container').innerHTML=`
-        <div class="nav-blur pb-safe h-[68px] flex items-center justify-around fixed bottom-0 w-full z-40 px-2 ">
-            <button onclick="App.switch('home')" id="nav-home" class="nav-item group relative flex-1 h-full flex flex-col items-center justify-center cursor-pointer select-none touch-manipulation active:scale-95 transition-all">
-                <div class="nav-icon-wrapper w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300">
-                    <i data-lucide="home" class="w-5 h-5"></i>
-                </div>
-                <span class="nav-label text-[10px] font-bold transition-all duration-300">Home</span>
-            </button>
-            <button onclick="App.switch('search')" id="nav-search" class="nav-item group relative flex-1 h-full flex flex-col items-center justify-center cursor-pointer select-none touch-manipulation active:scale-95 transition-all">
-                <div class="nav-icon-wrapper w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300">
-                    <i data-lucide="search" class="w-5 h-5"></i>
-                </div>
-                <span class="nav-label text-[10px] font-bold transition-all duration-300">Search</span>
-            </button>
-            <button onclick="App.switch('library')" id="nav-library" class="nav-item group relative flex-1 h-full flex flex-col items-center justify-center cursor-pointer select-none touch-manipulation active:scale-95 transition-all">
-                <div class="nav-icon-wrapper w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300">
-                    <i data-lucide="library" class="w-5 h-5"></i>
-                </div>
-                <span class="nav-label text-[10px] font-bold transition-all duration-300">Library</span>
-            </button>
-            <button onclick="App.switch('profile')" id="nav-profile" class="nav-item group relative flex-1 h-full flex flex-col items-center justify-center cursor-pointer select-none touch-manipulation active:scale-95 transition-all">
-                <div class="nav-icon-wrapper w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300">
-                    <i data-lucide="user" class="w-5 h-5"></i>
-                </div>
-                <span class="nav-label text-[10px] font-bold transition-all duration-300">Profil</span>
-            </button>
-        </div>`;
+        Nav.render();
 
         gid('view-profile').innerHTML=`
         <div class="pt-12 px-4 pb-6 text-center">
@@ -210,29 +184,7 @@ var App={
             }
         }
 
-        ['home','search','library','profile'].forEach(function(n){
-            var b=gid('nav-'+n);
-            if(!b)return;
-            var wrapper = b.querySelector('.nav-icon-wrapper');
-            var label = b.querySelector('.nav-label');
-            var isCurrent = (n === t);
-
-            if(isCurrent){
-                if(wrapper){
-                    wrapper.className = 'nav-icon-wrapper w-11 h-11 rounded-full flex items-center justify-center text-white btn-chrome  shadow-white/30 border-2 border-[#3f3f3f] scale-110 transition-all duration-300';
-                }
-                if(label){
-                    label.className = 'nav-label text-[11px] font-black text-white tracking-wider chrome-text transition-all duration-300';
-                }
-            } else {
-                if(wrapper){
-                    wrapper.className = 'nav-icon-wrapper w-10 h-10 rounded-full flex items-center justify-center text-[#8e95a2] hover:text-white bg-transparent translate-y-0 transition-all duration-300';
-                }
-                if(label){
-                    label.className = 'nav-label text-[10px] font-semibold text-[#8e95a2] translate-y-0 transition-all duration-300';
-                }
-            }
-        });
+        Nav.setActive(t);
 
         gid('main-area').scrollTop=0;lucide.createIcons();
     }

@@ -408,6 +408,112 @@
             transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.5s cubic-bezier(0.22, 1, 0.36, 1);
         }
 
+        .nav-dock-wrap {
+            position: fixed;
+            bottom: 16px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 40;
+            width: auto;
+            max-width: 36rem;
+            display: flex;
+            justify-content: center;
+            pointer-events: none;
+            padding: 0 8px;
+            margin-bottom: env(safe-area-inset-bottom, 0px);
+        }
+        .nav-dock {
+            pointer-events: auto;
+            background: rgba(18, 18, 20, 0.92);
+            -webkit-backdrop-filter: blur(40px);
+            backdrop-filter: blur(40px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 9999px;
+            padding: 8px 12px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        @media (min-width: 640px) {
+            .nav-dock-wrap { bottom: 24px; }
+            .nav-dock { padding: 10px 16px; }
+        }
+        #gooey-nav-list { gap: 6px; }
+        @media (min-width: 640px) { #gooey-nav-list { gap: 8px; } }
+        @media (min-width: 768px) { #gooey-nav-list { gap: 12px; } }
+        .nav-link { padding: 10px 14px; transition: color 0.3s; }
+        @media (min-width: 640px) { .nav-link { padding: 12px 20px; } }
+        .nav-label { font-size: 12px; }
+        @media (min-width: 640px) { .nav-label { font-size: 14px; } }
+        @media (min-width: 768px) { .nav-inactive-item .nav-label { display: inline-block; } }
+        .gooey-nav-container { position: relative; }
+        .gooey-nav-container .effect {
+            position: absolute;
+            pointer-events: none;
+            display: grid;
+            place-items: center;
+            z-index: 1;
+            filter: url(#gooey-nav-filter);
+            transition: left 0.28s cubic-bezier(0.4, 0, 0.2, 1), top 0.28s ease, width 0.28s cubic-bezier(0.4, 0, 0.2, 1), height 0.28s ease;
+        }
+        .gooey-nav-container .effect::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: #ffffff;
+            transform: scale(0);
+            opacity: 0;
+            z-index: -1;
+            border-radius: 9999px;
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.35);
+        }
+        .gooey-nav-container .effect.active::after { animation: gooey-pill 0.3s ease both; }
+        @keyframes gooey-pill { to { transform: scale(1); opacity: 1; } }
+        .gooey-nav-container .particle,
+        .gooey-nav-container .point {
+            display: block;
+            opacity: 0;
+            width: 20px;
+            height: 20px;
+            border-radius: 9999px;
+            transform-origin: center;
+        }
+        .gooey-nav-container .particle {
+            --time: 5s;
+            position: absolute;
+            top: calc(50% - 10px);
+            left: calc(50% - 10px);
+            animation: particle calc(var(--time)) ease 1 -350ms;
+        }
+        .gooey-nav-container .point {
+            background: #ffffff;
+            opacity: 1;
+            animation: point calc(var(--time)) ease 1 -350ms;
+        }
+        @keyframes particle {
+            0% { transform: rotate(0deg) translate(calc(var(--start-x)), calc(var(--start-y))); opacity: 1; animation-timing-function: cubic-bezier(0.55, 0, 1, 0.45); }
+            70% { transform: rotate(calc(var(--rotate) * 0.5)) translate(calc(var(--end-x) * 1.2), calc(var(--end-y) * 1.2)); opacity: 1; animation-timing-function: ease; }
+            85% { transform: rotate(calc(var(--rotate) * 0.66)) translate(calc(var(--end-x)), calc(var(--end-y))); opacity: 1; }
+            100% { transform: rotate(calc(var(--rotate) * 1.2)) translate(calc(var(--end-x) * 0.5), calc(var(--end-y) * 0.5)); opacity: 1; }
+        }
+        @keyframes point {
+            0% { transform: scale(0); opacity: 0; animation-timing-function: cubic-bezier(0.55, 0, 1, 0.45); }
+            25% { transform: scale(calc(var(--scale) * 0.25)); }
+            38% { opacity: 1; }
+            65% { transform: scale(var(--scale)); opacity: 1; animation-timing-function: ease; }
+            85% { transform: scale(var(--scale)); opacity: 1; }
+            100% { transform: scale(0); opacity: 0; }
+        }
+        .gooey-nav-container ul li.active { color: #000000 !important; }
+        .gooey-nav-container ul li.active svg { stroke: #000000 !important; color: #000000 !important; }
+        .gooey-nav-container ul li.active span { color: #000000 !important; }
+        .gooey-nav-container .nav-inactive-item { color: rgba(255, 255, 255, 0.55); }
+        .gooey-nav-container .nav-inactive-item:hover { color: #ffffff; }
+        .gooey-nav-container .nav-inactive-item svg { stroke: currentColor; color: currentColor; }
+        .gooey-nav-container .nav-inactive-item span { color: currentColor; }
+
+
         @keyframes slideInRight {
             0% { transform: translateX(30px); opacity: 0; }
             100% { transform: translateX(0); opacity: 1; }
@@ -481,17 +587,19 @@
 
     <script src="/config.js?v=1"></script>
     <script src="/supabaseClient.js?v=1"></script>
-    <script src="/player.js?v=18"></script>
+    <script src="/player.js?v=19"></script>
+    <script src="/media.js?v=1"></script>
+    <script src="/nav.js?v=1"></script>
     <script src="/auth.js?v=4"></script>
     <script src="/sync.js?v=1"></script>
     <script src="/info.js?v=1"></script>
-    <script src="/home.js?v=18"></script>
-    <script src="/search.js?v=18"></script>
+    <script src="/home.js?v=19"></script>
+    <script src="/search.js?v=19"></script>
     <script src="/miniplayer.js?v=16"></script>
     <script src="/fullplayer.js?v=16"></script>
     <script src="/artist.js?v=18"></script>
     <script src="/album.js?v=18"></script>
-    <script src="/app.js?v=17"></script>
+    <script src="/app.js?v=18"></script>
     <script>
     (function () {
         document.addEventListener('visibilitychange', function () {

@@ -149,7 +149,7 @@ var FullPlayer={
             </button>
 
             <div class="flex-1 flex flex-col md:flex-row w-full h-full overflow-hidden relative z-10">
-                <div id="lyrics-scroll-container" class="w-full md:w-3/5 h-full overflow-y-auto px-6 md:px-16 hide-scrollbar z-10 relative" style="touch-action:pan-y;">
+                <div id="lyrics-scroll-container" class="w-full md:w-3/5 h-full overflow-y-auto px-6 md:px-16 hide-scrollbar z-10 relative scroll-smooth" style="touch-action:pan-y;">
                     <div class="pt-[30vh] pb-[60vh] w-full max-w-3xl mx-auto md:mx-0">
                         <div id="lyrics-loading" class="flex justify-center items-center h-[30vh] w-full">
                             <div class="w-10 h-10 border-4 border-[#cfd3d8] border-t-transparent rounded-full animate-spin"></div>

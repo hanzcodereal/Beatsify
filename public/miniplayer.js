@@ -1,7 +1,7 @@
 var MP={
     init(){
         gid('mini-container').innerHTML=`
-        <div id="mini-player" class="hidden fixed left-3 right-3 sm:left-auto sm:right-6 sm:w-96 z-[160]" style="bottom:75px;transition:transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);transform:translateY(150px);">
+        <div id="mini-player" class="hidden fixed left-3 right-3 sm:left-auto sm:right-6 sm:w-96 z-[160]" style="bottom:96px;transition:transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);transform:translateY(150px);">
             <div id="mini-player-inner" onclick="FullPlayer.open()" class="rounded-full px-3 py-2 flex items-center gap-3 cursor-pointer active:scale-[0.98] transition-all relative overflow-hidden bg-[#12131b] border border-[#333333] group">
                 <div id="mini-beats-bg" class="absolute inset-0 pointer-events-none opacity-40 transition-opacity duration-500 overflow-hidden rounded-full z-0 hidden">
                     <div id="mini-beats-bg-gradient" class="absolute inset-0 transition-all duration-700"></div>
