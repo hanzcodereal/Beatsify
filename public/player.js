@@ -56,7 +56,7 @@ AU.addEventListener('pause',function(){if(!AU.ended){S.ip=false;UB();ST();}});
 AU.addEventListener('waiting',function(){S.il=true;UB();});
 AU.addEventListener('playing',function(){S.il=false;UB();});
 AU.addEventListener('ended',function(){ST();if(handleTrackEnded())return;if(S.rm==='one'){AU.currentTime=0;AU.play().catch(function(){});}else if(S.autoNext){NX();}else{S.ip=false;UB();}});
-AU.addEventListener('error',function(){if(AU.src){S.il=false;S.ip=false;UB();}});
+AU.addEventListener('error',function(){if(AU.src&&!AU.onerror){S.il=false;S.ip=false;UB();}});
 
 function SP(){
     ST();
@@ -267,7 +267,7 @@ function UU(){
 function PK(s,i){
     var l=[];if(s==='home1')l=S.ht.slice(0,8);else if(s==='home3')l=S.htr||[];else if(s==='home2')l=S.ht.slice(6,12);else if(s==='homecat')l=S.hc||[];else if(s==='search')l=S.sr;else if(s==='playlist'||s==='album'||s==='artist'||s==='direct')l=S.pl;else if(s==='rec0')l=S.rec0||[];else if(s==='rec1')l=S.rec1||[];else if(s==='rec2')l=S.rec2||[];else if(s==='rec3')l=S.rec3||[];
     if(!l[i])return;
-    if(S.ct && (S.ct.id === l[i].id || S.ct.videoId === l[i].videoId) && AU.src){
+    if(S.ct && (S.ct.id === l[i].id || S.ct.videoId === l[i].videoId) && AU.src && S.audioFor===(l[i].videoId||l[i].id)){
         if(typeof MP !== 'undefined' && MP.togglePlay) { MP.togglePlay(); return; }
     }
     S.ps=s;S.pl=l;S.pi=i;S.ct=l[i];
@@ -288,30 +288,55 @@ function loadTrack(track,resumeAt){
 
 async function fetchAudioAndPlay(track,resumeAt){
     S.il=true;UB();
+    var vid=track.videoId||track.id;
+    var ytUrl=track.ytUrl||('https://youtube.com/watch?v='+vid);
+    var streamUrl='';
     try{
-        var ytUrl=track.ytUrl||('https://youtube.com/watch?v='+track.videoId);
-        var r=await fetch(API.ytplay,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({query:ytUrl})});
-        var d=await r.json();
+        var ctrl=new AbortController();
+        var tid=setTimeout(function(){ctrl.abort();},5000);
+        var r=await fetch(API.ytplay,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({query:ytUrl}),signal:ctrl.signal});
+        clearTimeout(tid);
+        var d=await r.json().catch(function(){return {};});
+        if(d&&d.status&&d.result&&d.result.download&&d.result.download.audio){streamUrl=d.result.download.audio;}
+        else if(d&&d.url){streamUrl=d.url;}
+    }catch(e){}
+    if(S.ct!==track)return;
+    if(!streamUrl&&typeof ClientExtractor!=='undefined'){
+        try{
+            var cr=await ClientExtractor.extract(vid,ytUrl);
+            if(cr&&cr.audioUrl)streamUrl=cr.audioUrl;
+        }catch(e){}
         if(S.ct!==track)return;
-        if(d&&d.status&&d.result&&d.result.download&&d.result.download.audio){
-            var audioUrl = d.result.download.audio;
-            if (audioCtx) {
-                AU.src = '/api/proxy-audio?url=' + encodeURIComponent(audioUrl);
-            } else {
-                AU.removeAttribute('crossorigin');
-                AU.src = audioUrl;
-            }
-            if(resumeAt){
-                var onMeta=function(){AU.currentTime=resumeAt;AU.removeEventListener('loadedmetadata',onMeta);};
-                AU.addEventListener('loadedmetadata',onMeta);
-            }
-            AU.play().catch(function(){});
-        }else{
-            S.il=false;S.ip=false;UB();
-        }
-    }catch(e){
-        if(S.ct===track){S.il=false;S.ip=false;UB();}
     }
+    if(!streamUrl){
+        S.audioFor='';S.il=false;S.ip=false;UB();
+        if(typeof showToast==='function')showToast('Gagal memutar lagu, coba lagi');
+        return;
+    }
+    var isDirect=streamUrl.indexOf('vidssave.com')>-1||streamUrl.indexOf('aliyuncs.com')>-1;
+    var playUrl=isDirect?streamUrl:'/api/proxy-audio?url='+encodeURIComponent(streamUrl);
+    var fellBack=false;
+    AU.onerror=function(){
+        if(S.ct!==track)return;
+        if(!fellBack&&streamUrl){
+            fellBack=true;
+            try{AU.removeAttribute('crossorigin');}catch(e){}
+            AU.src=streamUrl;
+            AU.play().catch(function(){S.il=false;S.ip=false;UB();});
+        }else{
+            S.audioFor='';S.il=false;S.ip=false;UB();
+        }
+    };
+    if(isDirect||!audioCtx){
+        AU.removeAttribute('crossorigin');
+    }
+    S.audioFor=vid;
+    AU.src=(audioCtx||isDirect)?playUrl:streamUrl;
+    if(resumeAt){
+        var onMeta=function(){AU.currentTime=resumeAt;AU.removeEventListener('loadedmetadata',onMeta);};
+        AU.addEventListener('loadedmetadata',onMeta);
+    }
+    AU.play().catch(function(){});
 }
 
 function TP(){

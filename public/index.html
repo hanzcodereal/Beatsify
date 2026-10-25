@@ -408,6 +408,23 @@
             transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.5s cubic-bezier(0.22, 1, 0.36, 1);
         }
 
+        .flip-card { perspective: 1100px; }
+        .flip-rotor {
+            position: absolute;
+            inset: 0;
+            transform-style: preserve-3d;
+            transition: transform 0.85s cubic-bezier(0.34, 1.35, 0.5, 1);
+        }
+        .flip-rotor.flipped { transform: rotateY(180deg); }
+        .flip-face {
+            position: absolute !important;
+            inset: 0;
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+        }
+        .flip-face-back { transform: rotateY(180deg); }
+        .flip-rotor:not(.flipped) .flip-face-back { pointer-events: none; }
+        .flip-rotor.flipped .flip-face:not(.flip-face-back) { pointer-events: none; }
         .nav-dock-wrap {
             position: fixed;
             bottom: 16px;
@@ -587,7 +604,9 @@
 
     <script src="/config.js?v=1"></script>
     <script src="/supabaseClient.js?v=1"></script>
-    <script src="/player.js?v=19"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js"></script>
+    <script src="/extractor.js?v=1"></script>
+    <script src="/player.js?v=20"></script>
     <script src="/media.js?v=1"></script>
     <script src="/nav.js?v=1"></script>
     <script src="/auth.js?v=4"></script>
@@ -596,7 +615,7 @@
     <script src="/home.js?v=19"></script>
     <script src="/search.js?v=19"></script>
     <script src="/miniplayer.js?v=16"></script>
-    <script src="/fullplayer.js?v=16"></script>
+    <script src="/fullplayer.js?v=17"></script>
     <script src="/artist.js?v=18"></script>
     <script src="/album.js?v=18"></script>
     <script src="/app.js?v=18"></script>

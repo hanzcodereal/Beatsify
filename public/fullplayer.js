@@ -31,8 +31,9 @@ var FullPlayer={
             </div>
 
             <div class="relative z-10 flex-1 flex items-center justify-center my-auto px-4 py-1" style="min-height:0;overflow:hidden;">
-                <div class="relative w-[86%] sm:w-[88%] max-w-[340px] aspect-square flex items-center justify-center">
-                    <div id="full-cover-view" class="w-full h-full relative flex items-center justify-center">
+                <div class="flip-card relative w-[86%] sm:w-[88%] max-w-[340px] aspect-square flex items-center justify-center">
+                    <div id="full-flip-rotor" class="flip-rotor">
+                    <div id="full-cover-view" class="flip-face w-full h-full relative flex items-center justify-center">
                         <img id="full-cover" src="" class="w-full h-full object-cover rounded-2xl transition-transform duration-300 border border-[#333333] shadow-2xl" />
                         <div id="full-cover-overlay" class="absolute inset-0 rounded-2xl flex flex-col items-center justify-center bg-black/50 transition-opacity duration-200 opacity-0 pointer-events-none z-20">
                             <div id="full-cover-icon" class="mb-2 text-white flex items-center justify-center"></div>
@@ -40,7 +41,7 @@ var FullPlayer={
                         </div>
                     </div>
 
-                    <div id="full-lyrics-view" class="hidden w-full h-full relative rounded-2xl bg-black/50 backdrop-blur-2xl border border-[#383838] p-3.5 overflow-hidden flex flex-col shadow-2xl">
+                    <div id="full-lyrics-view" class="flip-face flip-face-back w-full h-full relative rounded-2xl bg-black/50 backdrop-blur-2xl border border-[#383838] p-3.5 overflow-hidden flex flex-col shadow-2xl">
                         <div id="full-inline-lyrics-scroll" class="flex-1 w-full overflow-y-auto no-scrollbar scroll-smooth relative z-10" style="touch-action:pan-y;">
                             <div id="full-inline-lyrics-loading" class="hidden h-full flex flex-col items-center justify-center text-white/50 text-xs gap-2 py-8">
                                 <div class="w-6 h-6 border-2 border-[#3a3a3a] border-t-white rounded-full animate-spin"></div>
@@ -66,6 +67,7 @@ var FullPlayer={
                                 <span>Lirik Penuh</span>
                             </button>
                         </div>
+                    </div>
                     </div>
                 </div>
             </div>
@@ -181,14 +183,12 @@ var FullPlayer={
     currentViewMode: 'cover',
     switchView(mode) {
         FullPlayer.currentViewMode = mode;
-        var coverView = gid('full-cover-view');
-        var lyricsView = gid('full-lyrics-view');
         var tabCover = gid('full-tab-cover');
         var tabLyrics = gid('full-tab-lyrics');
 
+        var rotor = gid('full-flip-rotor');
         if (mode === 'lyrics') {
-            if (coverView) coverView.classList.add('hidden');
-            if (lyricsView) lyricsView.classList.remove('hidden');
+            if (rotor) rotor.classList.add('flipped');
 
             if (tabCover) {
                 tabCover.className = 'px-4 py-1 rounded-full text-xs font-bold transition-all text-white/60 hover:text-white bg-transparent cursor-pointer';
@@ -206,8 +206,7 @@ var FullPlayer={
                 ULH(typeof S !== 'undefined' ? (S.pt || 0) : 0, true);
             }
         } else {
-            if (lyricsView) lyricsView.classList.add('hidden');
-            if (coverView) coverView.classList.remove('hidden');
+            if (rotor) rotor.classList.remove('flipped');
 
             if (tabCover) {
                 tabCover.className = 'px-4 py-1 rounded-full text-xs font-bold transition-all text-white bg-white/20 shadow-md cursor-pointer';
