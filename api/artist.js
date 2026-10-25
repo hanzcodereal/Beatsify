@@ -1,8 +1,7 @@
- const https = require('https');
+const https = require('https');
 const API_KEY = 'AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8';
 
 function getRunsText(r) { return Array.isArray(r) ? r.map(x=>x.text||'').join('') : ''; }
-function removeKeysRecursive(o, k) { if(!o||typeof o!=='object')return; if(Array.isArray(o)){o.forEach(i=>removeKeysRecursive(i,k));return;} for(const key of Object.keys(o)){if(k.includes(key))delete o[key];else if(typeof o[key]==='object')removeKeysRecursive(o[key],k);} }
 
 function toHDThumbnail(url, videoId) {
     if (!url && videoId) return `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`;
@@ -10,11 +9,11 @@ function toHDThumbnail(url, videoId) {
     let hd = String(url);
     if (hd.includes('googleusercontent.com') || hd.includes('ggpht.com') || hd.includes('ytimg.com')) {
         if (/=w\d+-h\d+/i.test(hd)) {
-            hd = hd.replace(/=w\d+-h\d+[^?#]*/i, '=w1080-h1080-l90-rj');
+            hd = hd.replace(/=w\d+-h\d+[^?#]*/i, '=w800-h800-l90-rj');
         } else if (/=s\d+/i.test(hd)) {
-            hd = hd.replace(/=s\d+[^?#]*/i, '=w1080-h1080-l90-rj');
+            hd = hd.replace(/=s\d+[^?#]*/i, '=s800-c-k-c0x00ffffff-no-rj');
         } else if (/=w\d+/i.test(hd)) {
-            hd = hd.replace(/=w\d+[^?#]*/i, '=w1080-h1080-l90-rj');
+            hd = hd.replace(/=w\d+[^?#]*/i, '=w800-h800-l90-rj');
         }
     }
     if (hd.includes('i.ytimg.com/vi/') || hd.includes('img.youtube.com/vi/')) {
@@ -94,8 +93,7 @@ module.exports = async (req, res) => {
             }
         } catch(e) {}
 
-        const result = { status: true, input: { id: artistId }, result: { artistId, name, thumbnails, topSongs, topAlbums, topSingles, topVideos, playlists, featuredOn, similarArtists, creator: 'Nanzz' } };
-        removeKeysRecursive(result, ['creator']);
+        const result = { status: true, input: { id: artistId }, result: { artistId, name, thumbnails, topSongs, topAlbums, topSingles, topVideos, playlists, featuredOn, similarArtists } };
         res.status(200).json(result);
     } catch(e) { res.status(500).json({ status: false, message: 'Gagal: '+e.message }); }
 };

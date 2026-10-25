@@ -52,10 +52,10 @@ function makeRequest(o, p) {
 module.exports = async (req, res) => {
     if (req.method === 'OPTIONS') { res.status(200).end(); return; }
     if (req.method !== 'GET') { res.status(405).json({ status: false, message: 'Method not allowed' }); return; }
-    
+
     const id = (req.query.id || '').trim();
     if (!id) { res.status(400).json({ status: false, message: 'Parameter id wajib diisi' }); return; }
-    
+
     try {
         let browseId = id;
         if (!browseId.startsWith('VL') && browseId.startsWith('PL')) {
@@ -67,8 +67,8 @@ module.exports = async (req, res) => {
         const hostname = isPlaylist ? 'youtubei.googleapis.com' : 'music.youtube.com';
 
         const data = await makeRequest({
-            hostname: hostname, 
-            path: '/youtubei/v1/browse?key='+API_KEY, 
+            hostname: hostname,
+            path: '/youtubei/v1/browse?key='+API_KEY,
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'User-Agent': 'Mozilla/5.0 Chrome/131.0.0.0', 'Origin': 'https://music.youtube.com' }
         }, { context: { client: { clientName: clientName, clientVersion: isPlaylist ? '2.20240726.00.00' : '1.20240101.00.00', hl: 'en', gl: 'ID' } }, browseId });
@@ -92,34 +92,34 @@ module.exports = async (req, res) => {
 
             const lockups = [];
             findAllKeys(data, 'lockupViewModel', lockups);
-            
+
             for (const lock of lockups) {
                 const videoId = lock.contentId || '';
                 if (!videoId || songs.find(s => s.videoId === videoId)) continue;
-                
+
                 const songTitle = lock.metadata?.lockupMetadataViewModel?.title?.content || 'Unknown';
-                
+
                 const rows = lock.metadata?.lockupMetadataViewModel?.metadata?.contentMetadataViewModel?.metadataRows || [];
                 let artist = '';
                 if (rows[0]?.metadataParts?.[0]?.text?.content) {
                     artist = rows[0].metadataParts[0].text.content;
                 }
-                
+
                 let duration = '';
                 const a11yLabel = lock.rendererContext?.accessibilityContext?.label || '';
                 const m = a11yLabel.match(/(\d+\s*(?:detik|menit|jam|\d+:\d+))/);
                 if (m) duration = m[1];
-                
+
                 if (!duration) {
                     const badges = lock.contentImage?.thumbnailViewModel?.overlays?.[0]?.thumbnailBottomOverlayViewModel?.badges || [];
                     if (badges[0]?.thumbnailBadgeViewModel?.text) {
                         duration = badges[0].thumbnailBadgeViewModel.text;
                     }
                 }
-                
+
                 const sources = lock.contentImage?.thumbnailViewModel?.image?.sources || [];
                 let thumb = transformThumbs(sources.map(s => ({ url: s.url })), videoId);
-                
+
                 songs.push({
                     videoId,
                     title: songTitle,
@@ -133,7 +133,7 @@ module.exports = async (req, res) => {
             title = data?.microformat?.microformatDataRenderer?.title || 'Unknown Album';
             description = data?.microformat?.microformatDataRenderer?.description || '';
             thumbnails = data?.microformat?.microformatDataRenderer?.thumbnail?.thumbnails || [];
-            
+
             const h = data?.header?.musicDetailHeaderRenderer || {};
             let headerThumbnails = [];
             if (h.thumbnail?.croppedSquareThumbnailRenderer?.thumbnail?.thumbnails) {
@@ -145,15 +145,15 @@ module.exports = async (req, res) => {
             if (thumbnails.length === 0 && headerThumbnails.length > 0) {
                 thumbnails = headerThumbnails;
             }
-            
-            let items = data?.contents?.twoColumnBrowseResultsRenderer?.secondaryContents?.sectionListRenderer?.contents?.[0]?.musicPlaylistShelfRenderer?.contents || 
+
+            let items = data?.contents?.twoColumnBrowseResultsRenderer?.secondaryContents?.sectionListRenderer?.contents?.[0]?.musicPlaylistShelfRenderer?.contents ||
                           data?.contents?.singleColumnBrowseResultsRenderer?.tabs?.[0]?.tabRenderer?.content?.sectionListRenderer?.contents?.[0]?.musicPlaylistShelfRenderer?.contents;
-            
+
             if (!items) {
-                items = data?.contents?.twoColumnBrowseResultsRenderer?.secondaryContents?.sectionListRenderer?.contents?.[0]?.musicShelfRenderer?.contents || 
+                items = data?.contents?.twoColumnBrowseResultsRenderer?.secondaryContents?.sectionListRenderer?.contents?.[0]?.musicShelfRenderer?.contents ||
                         data?.contents?.singleColumnBrowseResultsRenderer?.tabs?.[0]?.tabRenderer?.content?.sectionListRenderer?.contents?.[0]?.musicShelfRenderer?.contents || [];
             }
-            
+
             let albumArtist = getRunsText(h.subtitle?.runs || []);
             if (albumArtist.includes(' • ')) {
                 albumArtist = albumArtist.split(' • ').find(x => !['Album', 'Single', 'EP', 'Playlist', '2023', '2024', '2022', '2021', '2020'].includes(x.trim())) || albumArtist;
@@ -162,24 +162,24 @@ module.exports = async (req, res) => {
                 const mat = title.match(/Album by (.*)$/);
                 if (mat) albumArtist = mat[1];
             }
-            
+
             for (const item of items) {
                 if (item.musicResponsiveListItemRenderer) {
                     const i = item.musicResponsiveListItemRenderer;
                     const videoId = i.playlistItemData?.videoId || i.flexColumns?.[0]?.musicResponsiveListItemFlexColumnRenderer?.text?.runs?.[0]?.navigationEndpoint?.watchEndpoint?.videoId || '';
                     if (!videoId) continue;
-                    
+
                     const songTitle = getRunsText(i.flexColumns?.[0]?.musicResponsiveListItemFlexColumnRenderer?.text?.runs||[]);
                     const artistRuns = i.flexColumns?.[1]?.musicResponsiveListItemFlexColumnRenderer?.text?.runs||[];
                     let artist = getRunsText(artistRuns);
                     if (!artist) artist = albumArtist || 'Unknown Artist';
                     const artistId = artistRuns[0]?.navigationEndpoint?.browseEndpoint?.browseId || '';
-                    
+
                     const duration = getRunsText(i.fixedColumns?.[0]?.musicResponsiveListItemFixedColumnRenderer?.text?.runs||[]);
-                    
+
                     const rawThumb = i.thumbnail?.musicThumbnailRenderer?.thumbnail?.thumbnails || [];
                     const thumb = transformThumbs(rawThumb, videoId);
-                    
+
                     songs.push({
                         videoId,
                         title: songTitle,
@@ -199,7 +199,6 @@ module.exports = async (req, res) => {
 
         res.status(200).json({
             status: songs.length > 0 || isPlaylist,
-            creator: 'Nanzz',
             result: {
                 id,
                 title,

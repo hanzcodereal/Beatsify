@@ -9,13 +9,13 @@ function getRunsText(runs) { return Array.isArray(runs) ? runs.map(r => r.text |
 function parseSyncedLyrics(s) {
     if (!s) return [];
     const lines = [], p = /\[(\d{2,}):(\d{2})(?:\.(\d{2,3}))?\]\s*(.*)/;
-    for (const l of s.split('\n')) { 
-        const m = l.trim().match(p); 
+    for (const l of s.split('\n')) {
+        const m = l.trim().match(p);
         if (m) {
             let ms = 0;
             if (m[3]) ms = m[3].length === 3 ? parseInt(m[3])/1000 : parseInt(m[3])/100;
-            lines.push({ time: Math.round((parseInt(m[1])*60+parseInt(m[2])+ms)*100)/100, text: m[4].trim() || '• • •' }); 
-        } 
+            lines.push({ time: Math.round((parseInt(m[1])*60+parseInt(m[2])+ms)*100)/100, text: m[4].trim() || '• • •' });
+        }
     }
     return lines;
 }
@@ -57,7 +57,7 @@ function cleanA(a) {
     return a.replace(/- Topic/gi, '').replace(/\s+/g, ' ').trim();
 }
 
-async function getLyrics1(videoId, queryTitle = '', queryArtist = '', doTranslate = false, targetLang = 'id') {
+async function getLyrics1(videoId, queryTitle = '', queryArtist = '') {
     let title = (queryTitle || '').trim();
     let artist = (queryArtist || '').trim();
     let album = '';
@@ -144,10 +144,10 @@ async function getLyrics1(videoId, queryTitle = '', queryArtist = '', doTranslat
         } catch (e) {}
     }
 
-    if (doTranslate && lyricsData.lines && lyricsData.lines.length > 0) {
+    if (lyricsData.lines && lyricsData.lines.length > 0) {
         try {
-            const transPromise = translateLines(lyricsData.lines, targetLang);
-            const timeoutPromise = new Promise(resolve => setTimeout(() => resolve(lyricsData.lines), 3500));
+            const transPromise = translateLines(lyricsData.lines, 'id');
+            const timeoutPromise = new Promise(resolve => setTimeout(() => resolve(lyricsData.lines), 10000));
             lyricsData.lines = await Promise.race([transPromise, timeoutPromise]);
         } catch(e) {}
     }
@@ -155,26 +155,16 @@ async function getLyrics1(videoId, queryTitle = '', queryArtist = '', doTranslat
     return { videoId, title: title || cTitle, artist: artist || cArtist, album, lyrics: lyricsData };
 }
 
-function parseBoolParam(v) {
-    if (v === undefined || v === null) return false;
-    const s = String(v).trim().toLowerCase();
-    return s === '1' || s === 'true' || s === 'on' || s === 'yes';
-}
-
 const handler = async (req, res) => {
     if (req.method === 'OPTIONS') { res.status(200).end(); return; }
     const videoId = (req.query.id || req.body?.id || '').trim();
     const title = (req.query.title || req.body?.title || '').trim();
     const artist = (req.query.artist || req.body?.artist || '').trim();
-    // Terjemahan lirik bersifat opsional dan default-nya OFF (mati).
-    // Kirim ?translate=1 (atau translate=true/on) untuk mengaktifkan terjemahan.
-    const doTranslate = parseBoolParam(req.query.translate ?? req.body?.translate);
-    const targetLang = ((req.query.lang || req.body?.lang || 'id') + '').trim().toLowerCase();
 
     if (!videoId) { res.status(400).json({ status: false, message: 'Parameter id wajib diisi' }); return; }
 
     try {
-        const result = await getLyrics1(videoId, title, artist, doTranslate, targetLang);
+        const result = await getLyrics1(videoId, title, artist);
         res.status(200).json({ status: true, source: 'lrclib', result });
     } catch(e) {
         res.status(500).json({ status: false, message: e.message });

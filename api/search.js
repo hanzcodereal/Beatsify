@@ -53,10 +53,15 @@ async function fetchYoutube(query, type) {
 }
 
 module.exports = async (req, res) => {
-    const query = String(req.query.query || '').trim();
-    const type = String(req.query.type || 'all').trim(); // all, songs, playlists
+    if (req.method === 'OPTIONS') {
+        if (res.status) return res.status(200).send('OK');
+        return;
+    }
 
-    if (!query) return res.status(400).json({ status: false, creator: 'Nanzz', message: 'Parameter query diperlukan' });
+    const query = String(req.query.query || '').trim();
+    const type = String(req.query.type || 'all').trim();
+
+    if (!query) return res.status(400).json({ status: false, message: 'Parameter query diperlukan' });
 
     let urlVid = '';
     if (query.includes('youtube.com/') || query.includes('youtu.be/')) {
@@ -71,7 +76,7 @@ module.exports = async (req, res) => {
             };
             const r = await axios.post('https://music.youtube.com/youtubei/v1/next?prettyPrint=false', p, { timeout: 15000 });
             const item = r.data?.contents?.singleColumnMusicWatchNextResultsRenderer?.tabbedRenderer?.watchNextTabbedResultsRenderer?.tabs?.[0]?.tabRenderer?.content?.musicQueueRenderer?.content?.playlistPanelRenderer?.contents?.[0]?.playlistPanelVideoRenderer;
-            
+
             if (item && item.videoId === urlVid) {
                 const title = (item.title?.runs || []).map(r => r.text).join('');
                 const artist = (item.longBylineText?.runs || []).map(r => r.text).join('');
@@ -79,7 +84,7 @@ module.exports = async (req, res) => {
                 const thumbs = item.thumbnail?.thumbnails || [];
                 const rawThumb = thumbs.length ? thumbs[thumbs.length - 1].url : '';
                 const thumbnail = toHDThumbnail(rawThumb, urlVid);
-                
+
                 let duration = '';
                 const durMatch = durationText.match(/(\d+):(\d+)/);
                 if (durMatch) duration = durMatch[1] + '.' + durMatch[2];
@@ -87,7 +92,6 @@ module.exports = async (req, res) => {
 
                 return res.json({
                     status: true,
-                    creator: 'Nanzz',
                     result: {
                         query,
                         totalSongs: 1,
@@ -204,7 +208,7 @@ module.exports = async (req, res) => {
                             const cols = r.flexColumns || [];
                             const titleRuns = cols[0]?.musicResponsiveListItemFlexColumnRenderer?.text?.runs || [];
                             const title = titleRuns.map(x => x.text).join('');
-                            
+
                             const subRuns = cols[1]?.musicResponsiveListItemFlexColumnRenderer?.text?.runs || [];
                             let artist = '', artistId = '', album = '', albumId = '', duration = '';
                             for (const run of subRuns) {
@@ -231,7 +235,7 @@ module.exports = async (req, res) => {
                             const rawSongThumb = thumbs.length ? thumbs[thumbs.length - 1].url : '';
                             const thumbnail = toHDThumbnail(rawSongThumb, videoId);
                             if (!videoId) continue;
-                            
+
                             songs.push({ title, videoId, thumbnail, url: `https://music.youtube.com/watch?v=${videoId}`, artist: artist || (subRuns[1]?.text || ''), artistId, album: album || '', albumId, duration });
                         }
                     }
@@ -241,11 +245,10 @@ module.exports = async (req, res) => {
 
         return res.json({
             status: true,
-            creator: 'Nanzz',
             result: { query, totalSongs: songs.length, songs, albums, playlists, artists }
         });
 
     } catch (err) {
-        return res.status(500).json({ status: false, creator: 'Nanzz', message: err.message });
+        return res.status(500).json({ status: false, message: err.message });
     }
 };
