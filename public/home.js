@@ -301,7 +301,7 @@ var Home = {
             <div>
                 <h2 class="text-base font-bold mb-3 flex items-center gap-2">
                     <span class="w-1.5 h-4 bg-white/90 rounded-full inline-block"></span>
-                    <span class="chrome-text">Lagu Populer - ${es(catName)}</span>
+                    <span class="chrome-text">Trending di Indonesia</span>
                 </h2>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-3">${songsHtml}</div>
             </div>
@@ -309,7 +309,7 @@ var Home = {
             ${plistHtml ? `<div>
                 <h2 class="text-base font-bold mb-3 flex items-center gap-2">
                     <span class="w-1.5 h-4 bg-white/90 rounded-full inline-block"></span>
-                    <span class="chrome-text">Playlist & Album ${es(catName)}</span>
+                    <span class="chrome-text">Hits & Playlist Indonesia</span>
                 </h2>
                 <div class="flex gap-3 overflow-x-auto hide-scrollbar pb-3">${plistHtml}</div>
             </div>` : ''}
@@ -364,15 +364,32 @@ var Home = {
 
     async _doFetch() {
         Home.showSkeleton();
+        // Bagian "Trending di Indonesia" & "Hits & Playlist Indonesia" diisi dari pencarian dengan judul yang sama.
+        var srch = function(q, type) {
+            return fetch(API.search + '?query=' + encodeURIComponent(q) + '&type=' + type)
+                .then(function(r) { return r.json(); }).catch(function() { return null; });
+        };
+        var pHome = fetch(API.home).then(function(r) { return r.json(); }).catch(function() { return null; });
+        var pTrend = srch('Trending di Indonesia', 'songs');
+        var pHits = srch('Hits & Playlist Indonesia', 'playlists');
+        var res = await Promise.all([pHome, pTrend, pHits]);
+        var d = res[0], dt = res[1], dh = res[2];
         try {
-            var r = await fetch(API.home);
-            var d = await r.json();
-            if (d.status && d.result) {
+            if (d && d.status && d.result) {
                 S.ht = (d.result.quickPicks || []).map(Home.mapSong);
                 S.htr = (d.result.trending || []).map(Home.mapSong);
                 S.hp = d.result.playlists || [];
                 S.hal = d.result.albums || [];
                 S.ha = d.result.artists || [];
+            }
+            if (dt && dt.status && dt.result && dt.result.songs && dt.result.songs.length > 0) {
+                S.htr = dt.result.songs.map(function(x) {
+                    return { id: x.videoId, videoId: x.videoId, title: cn(x.title), artist: cn(x.artist), artistId: x.artistId || '', cover: toHDCover(x.thumbnail, x.videoId), ytUrl: x.url };
+                });
+            }
+            if (dh && dh.status && dh.result) {
+                var found = [].concat(dh.result.playlists || [], dh.result.albums || []);
+                if (found.length > 0) S.hp = found;
             }
         } catch(e){}
 
