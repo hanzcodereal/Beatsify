@@ -23,6 +23,8 @@ var Auth = {
         'alert': '<circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/>',
         'check': '<circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/>',
         'info': '<circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/>',
+        'camera': '<path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3z"/><circle cx="12" cy="13" r="3"/>',
+        'logout': '<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/>',
         'music': '<path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>'
     },
     icon: function (name, cls) {
@@ -165,7 +167,7 @@ var Auth = {
 
     friendlyError(err) {
         var m = String((err && err.message) || err || '');
-        if (/invalid login credentials/i.test(m)) return 'Email atau password salah.';
+        if (/invalid login credentials/i.test(m)) return 'Sandi salah. Periksa lagi sandi dan emailmu.';
         if (/email not confirmed/i.test(m)) return 'Email belum diverifikasi. Cek inbox (atau folder spam) kamu.';
         if (/already registered|already been registered|user already exists/i.test(m)) return 'Email ini sudah terdaftar. Silakan masuk.';
         if (/rate limit|too many|security purposes|over_email_send_rate_limit/i.test(m)) return 'Terlalu banyak percobaan. Tunggu sebentar lalu coba lagi.';
@@ -258,7 +260,7 @@ var Auth = {
             showToast('Berhasil keluar');
         } catch (e) {
             showToast('Gagal keluar: ' + e.message);
-            if (btn) { btn.disabled = false; btn.innerHTML = '<i data-lucide="log-out" class="w-4 h-4"></i> Log Out'; if (typeof lucide !== 'undefined') lucide.createIcons(); }
+            if (btn) { btn.disabled = false; btn.innerHTML = Auth.icon('logout') + ' Log Out'; }
         }
     },
 
@@ -324,6 +326,7 @@ var Auth = {
             if (error) { showToast('Gagal menyimpan username'); return; }
             Auth.profile = Auth.profile || {};
             Auth.profile.username = newName;
+            var nm = document.querySelector('.prof-name'); if (nm) nm.textContent = newName;
             showToast('Username diperbarui');
             if (typeof Home !== 'undefined' && Home.updateGreeting) Home.updateGreeting();
         } catch (e) { showToast('Gagal menyimpan username'); }
@@ -358,29 +361,25 @@ var Auth = {
 
         if (Auth.user) {
             var p = Auth.profile || {};
+            var uname = p.username || 'Pengguna';
             el.innerHTML = `
-            <div class="glass-strong rounded-2xl p-5 flex flex-col items-center gap-4">
-                <div class="relative">
-                    <img id="profile-avatar-img" src="${Auth._attr(p.avatar_url) || '/logo.png'}" class="w-24 h-24 rounded-full object-cover border-2 border-[#3a3a3a] bg-black" onerror="this.src='/logo.png'"/>
-                    <button onclick="document.getElementById('profile-avatar-input').click()" class="absolute -bottom-1 -right-1 btn-chrome rounded-full p-2 active:scale-90">
-                        <i data-lucide="camera" class="w-4 h-4"></i>
-                    </button>
-                    <input type="file" id="profile-avatar-input" accept="image/*" class="hidden" onchange="Auth.handleAvatarChange(event)">
+            <div class="prof-card">
+                <div class="prof-cover"></div>
+                <div class="prof-avatar-wrap">
+                    <img id="profile-avatar-img" src="${Auth._attr(p.avatar_url) || '/logo.png'}" class="prof-avatar" alt="" onerror="this.src='/logo.png'"/>
+                    <button type="button" class="prof-cam" aria-label="Ganti foto" onclick="document.getElementById('profile-avatar-input').click()">${Auth.icon('camera')}</button>
+                    <input type="file" id="profile-avatar-input" accept="image/*" style="display:none" onchange="Auth.handleAvatarChange(event)">
                 </div>
-                <div class="w-full text-left">
-                    <label class="text-white/50 text-xs uppercase tracking-wider">Username</label>
-                    <div class="flex gap-2 mt-1.5">
-                        <input id="profile-username-input" value="${Auth._attr(p.username || '')}" maxlength="30" class="glass-input flex-1 px-3 py-2.5 text-sm text-white rounded-lg outline-none" />
-                        <button onclick="Auth.saveUsername()" class="btn-chrome px-4 rounded-lg text-xs font-bold active:scale-95">Simpan</button>
+                <h2 class="prof-name">${es(uname)}</h2>
+                <div class="prof-mail">${Auth.icon('mail')}<span>${es(Auth.maskEmail(Auth.user.email || ''))}</span></div>
+                <div class="prof-edit">
+                    <label for="profile-username-input">Ubah username</label>
+                    <div class="prof-row">
+                        <input id="profile-username-input" value="${Auth._attr(p.username || '')}" maxlength="30" placeholder="Username" autocomplete="off" />
+                        <button type="button" onclick="Auth.saveUsername()">Simpan</button>
                     </div>
                 </div>
-                <div class="w-full text-left">
-                    <label class="text-white/50 text-xs uppercase tracking-wider">Email</label>
-                    <p class="text-white text-sm mt-1.5 truncate">${es(Auth.maskEmail(Auth.user.email || ''))}</p>
-                </div>
-                <button id="auth-logout-btn" onclick="Auth.signOut()" class="w-full btn-chrome font-bold py-3 rounded-full active:scale-95 transition-all flex items-center justify-center gap-2 text-rose-400">
-                    <i data-lucide="log-out" class="w-4 h-4"></i> Log Out
-                </button>
+                <button id="auth-logout-btn" type="button" onclick="Auth.signOut()" class="prof-logout">${Auth.icon('logout')} Log Out</button>
             </div>`;
         } else {
             el.innerHTML = Auth.authFormHTML();

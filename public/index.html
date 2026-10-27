@@ -659,7 +659,28 @@
         .auth-foot { margin-top: 18px; text-align: center; font-size: 10.5px; line-height: 1.5; color: #555963; max-width: 300px; }
         @media (max-height: 640px) { .auth-chips, .auth-tagline { display: none; } .auth-logo, .auth-logo-img { width: 64px; height: 64px; } .auth-hero { margin-bottom: 14px; } }
         @media (prefers-reduced-motion: reduce) { .auth-glow, .auth-vinyl, .auth-eq i, .auth-ring { animation: none !important; } }
-    </style>
+    
+        /* ---------- Profil ---------- */
+        .prof-card{position:relative;overflow:hidden;border-radius:24px;padding:0 20px 20px;text-align:center;background:linear-gradient(180deg,#141416,#08080a);border:1px solid #2d2d30;box-shadow:0 24px 50px -24px rgba(0,0,0,.9)}
+        .prof-cover{height:84px;margin:0 -20px;background:radial-gradient(120% 140% at 50% 0%,rgba(255,255,255,.2),transparent 70%),linear-gradient(180deg,#1d1d21,#101012)}
+        .prof-avatar-wrap{position:relative;width:104px;height:104px;margin:-52px auto 0}
+        .prof-avatar{width:104px;height:104px;border-radius:50%;object-fit:cover;background:#000;border:3px solid #fff;box-shadow:0 0 0 5px #0b0b0d,0 10px 30px rgba(0,0,0,.6)}
+        .prof-cam{position:absolute;right:-2px;bottom:2px;width:34px;height:34px;display:flex;align-items:center;justify-content:center;border-radius:50%;border:3px solid #0b0b0d;background:#fff;color:#000;cursor:pointer;transition:transform .15s}
+        .prof-cam:active{transform:scale(.9)}
+        .prof-cam svg,.prof-mail svg,.prof-logout svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+        .prof-name{margin:14px 0 0;font-size:1.3rem;font-weight:900;color:#fff;word-break:break-word}
+        .prof-mail{display:inline-flex;align-items:center;gap:7px;margin-top:8px;padding:6px 13px;border-radius:999px;font-size:12.5px;color:#c4c8d0;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);max-width:100%}
+        .prof-mail span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+        .prof-edit{margin-top:20px;text-align:left}
+        .prof-edit label{display:block;margin-bottom:7px;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.5)}
+        .prof-row{display:flex;gap:8px}
+        .prof-row input{flex:1;min-width:0;height:46px;padding:0 14px;border-radius:14px;background:#0a0a0b;border:1px solid #2d2d30;color:#fff;font-size:15px;outline:none}
+        .prof-row input:focus{border-color:rgba(255,255,255,.6);box-shadow:0 0 0 4px rgba(255,255,255,.07)}
+        .prof-row button{padding:0 18px;border:0;border-radius:14px;background:#fff;color:#000;font-weight:800;font-size:13px;cursor:pointer}
+        .prof-row button:active{transform:scale(.96)}
+        .prof-logout{margin-top:16px;width:100%;height:48px;display:flex;align-items:center;justify-content:center;gap:8px;border-radius:999px;border:1px solid rgba(244,63,94,.35);background:rgba(244,63,94,.08);color:#fb7185;font-weight:800;font-size:14px;cursor:pointer}
+        .prof-logout:disabled{opacity:.7}
+</style>
 </head>
 <body class="h-[100dvh] w-full bg-transparent text-white font-sans overflow-hidden flex flex-col">
     <div class="app-bg"><span></span><span></span><span></span></div>
@@ -693,7 +714,6 @@
                     </div>
                     <h1 class="auth-title">Beatsify</h1>
                     <p class="auth-tagline">Dengarkan musik favoritmu, lengkap dengan lirik.</p>
-                    <div class="auth-chips"><span>Lirik sinkron</span><span>Playlist tersimpan</span><span>Equalizer</span></div>
                 </div>
                 <div id="auth-gate-form" class="auth-form-wrap"></div>
                 <p class="auth-foot">Dengan masuk, kamu menyetujui penggunaan Beatsify untuk hiburan pribadi.</p>
@@ -723,7 +743,7 @@
     <script src="/player.js?v=23"></script>
     <script src="/media.js?v=1"></script>
     <script src="/nav.js?v=1"></script>
-    <script src="/auth.js?v=5"></script>
+    <script src="/auth.js?v=6"></script>
     <script src="/sync.js?v=2"></script>
     <script src="/info.js?v=1"></script>
     <script src="/home.js?v=21"></script>
@@ -732,7 +752,7 @@
     <script src="/fullplayer.js?v=19"></script>
     <script src="/artist.js?v=19"></script>
     <script src="/album.js?v=19"></script>
-    <script src="/app.js?v=21"></script>
+    <script src="/app.js?v=22"></script>
     <script>
     (function () {
         document.addEventListener('visibilitychange', function () {

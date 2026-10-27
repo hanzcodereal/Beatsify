@@ -13,9 +13,7 @@ var App={
                 <h3 class="text-white font-bold text-sm uppercase tracking-wider mb-2">Tentang Aplikasi</h3>
                 <div class="flex justify-between"><span class="text-white/70 text-sm">Nama</span><span class="text-white font-medium text-sm">Beatsify</span></div>
                 <div class="flex justify-between"><span class="text-white/70 text-sm">Versi</span><span class="text-white font-medium text-sm">v4.0.0</span></div>
-                <div class="flex justify-between"><span class="text-white/70 text-sm">Framework</span><span class="text-white font-medium text-sm">HTML + Tailwind + JS</span></div>
                 <div class="flex justify-between"><span class="text-white/70 text-sm">Dirilis</span><span class="text-white font-medium text-sm">Juni 2026</span></div>
-                <div class="flex justify-between"><span class="text-white/70 text-sm">Hosting</span><span class="text-white font-medium text-sm">Vercel</span></div>
             </div>
 
             <div class="glass rounded-2xl p-5 max-w-sm mx-auto space-y-4 text-left mb-6">
