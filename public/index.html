@@ -680,6 +680,17 @@
         .prof-row button:active{transform:scale(.96)}
         .prof-logout{margin-top:16px;width:100%;height:48px;display:flex;align-items:center;justify-content:center;gap:8px;border-radius:999px;border:1px solid rgba(244,63,94,.35);background:rgba(244,63,94,.08);color:#fb7185;font-weight:800;font-size:14px;cursor:pointer}
         .prof-logout:disabled{opacity:.7}
+
+        /* ---------- Informasi ---------- */
+        .info-card{display:flex;gap:12px;padding:14px;border-radius:18px;background:linear-gradient(180deg,#161618,#0b0b0c);border:1px solid #2d2d30;box-shadow:inset 0 1px 0 rgba(255,255,255,.05)}
+        .info-ic{flex-shrink:0;width:40px;height:40px;display:flex;align-items:center;justify-content:center;border-radius:12px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);color:#fff}
+        .info-ic svg{width:20px;height:20px}
+        .info-bd{min-width:0;flex:1}
+        .info-top{display:flex;align-items:center;gap:8px}
+        .info-top h4{margin:0;font-size:14px;font-weight:800;color:#fff;word-break:break-word}
+        .info-new{flex-shrink:0;padding:2px 8px;border-radius:999px;background:#fff;color:#000;font-size:9.5px;font-weight:900;letter-spacing:.06em;text-transform:uppercase}
+        .info-bd p{margin:6px 0 0;font-size:12.5px;line-height:1.5;color:rgba(255,255,255,.7);white-space:pre-line;word-break:break-word}
+        .info-date{display:block;margin-top:8px;font-size:10.5px;color:rgba(255,255,255,.35)}
 </style>
 </head>
 <body class="h-[100dvh] w-full bg-transparent text-white font-sans overflow-hidden flex flex-col">
@@ -743,16 +754,16 @@
     <script src="/player.js?v=23"></script>
     <script src="/media.js?v=1"></script>
     <script src="/nav.js?v=1"></script>
-    <script src="/auth.js?v=6"></script>
+    <script src="/auth.js?v=7"></script>
     <script src="/sync.js?v=2"></script>
-    <script src="/info.js?v=1"></script>
+    <script src="/info.js?v=2"></script>
     <script src="/home.js?v=21"></script>
     <script src="/search.js?v=20"></script>
     <script src="/miniplayer.js?v=17"></script>
     <script src="/fullplayer.js?v=19"></script>
     <script src="/artist.js?v=19"></script>
     <script src="/album.js?v=19"></script>
-    <script src="/app.js?v=22"></script>
+    <script src="/app.js?v=23"></script>
     <script>
     (function () {
         document.addEventListener('visibilitychange', function () {

@@ -62,9 +62,11 @@ var Auth = {
         } catch (e) { console.error(e); }
         Auth.ready = true;
         Auth.syncGate();
+        Auth.startPresence();
 
         sb.auth.onAuthStateChange(function (event, session) {
             if (event === 'SIGNED_OUT') {
+                Auth.stopPresence();
                 if (typeof DataSync !== 'undefined') DataSync.onLogout();
                 location.reload();
                 return;
@@ -87,6 +89,7 @@ var Auth = {
             await Auth._withTimeout(DataSync.onLogin(), 6000).catch(function () {});
         }
         Auth.syncGate();
+        Auth.startPresence();
         if (typeof S !== 'undefined' && S.at === 'profile') Auth.renderProfile();
         if (typeof Home !== 'undefined' && Home.updateGreeting) Home.updateGreeting();
     },
@@ -177,6 +180,42 @@ var Auth = {
         return m || 'Terjadi kesalahan. Coba lagi.';
     },
 
+    // Supabase memberi error yang sama untuk email salah & password salah, jadi cek tabel profiles
+    // untuk membedakannya: email tidak ada => "Email salah", email ada => "Password salah".
+    async _wrongCredentialMsg(email) {
+        try {
+            var res = await Auth._withTimeout(sb.from('profiles').select('id').eq('email', String(email).toLowerCase()).limit(1), 6000);
+            if (res && !res.error && Array.isArray(res.data)) {
+                return res.data.length ? 'Password salah. Coba periksa lagi.' : 'Email salah. Email ini belum terdaftar.';
+            }
+        } catch (e) {}
+        return 'Email atau password salah. Periksa lagi.';
+    },
+
+    // ---------- Status online (Supabase Realtime Presence) ----------
+    startPresence() {
+        try {
+            if (!Auth.user || !sb.channel) return;
+            if (Auth._presence && Auth._presenceUser === Auth.user.id) { Auth._trackPresence(); return; }
+            Auth.stopPresence();
+            Auth._presenceUser = Auth.user.id;
+            var ch = sb.channel('beatsify-online', { config: { presence: { key: Auth.user.id } } });
+            Auth._presence = ch;
+            ch.subscribe(function (status) { if (status === 'SUBSCRIBED') Auth._trackPresence(); });
+        } catch (e) { console.warn('presence:', e); }
+    },
+    _trackPresence() {
+        try {
+            if (!Auth._presence || !Auth.user) return;
+            var p = Auth.profile || {};
+            Auth._presence.track({ id: Auth.user.id, username: p.username || (Auth.user.email || 'user').split('@')[0], avatar_url: p.avatar_url || null, at: Date.now() });
+        } catch (e) {}
+    },
+    stopPresence() {
+        try { if (Auth._presence) { Auth._presence.untrack && Auth._presence.untrack(); sb.removeChannel && sb.removeChannel(Auth._presence); } } catch (e) {}
+        Auth._presence = null; Auth._presenceUser = null;
+    },
+
     _readForm() {
         var v = function (id) { var el = gid(id); return el ? (el.value || '') : ''; };
         return { username: v('auth-username').trim(), email: v('auth-email').trim(), password: v('auth-password') };
@@ -200,7 +239,11 @@ var Auth = {
         Auth.setBusy(true, 'Memproses...');
         try {
             var { error } = await Auth._withTimeout(sb.auth.signInWithPassword({ email: f.email, password: f.password }), 20000);
-            if (error) { Auth.setBusy(false); Auth.setMsg('error', Auth.friendlyError(error)); return; }
+            if (error) {
+                var wrong = /invalid login credentials/i.test(String(error.message || ''));
+                var msg = wrong ? await Auth._wrongCredentialMsg(f.email) : Auth.friendlyError(error);
+                Auth.setBusy(false); Auth.setMsg('error', msg); return;
+            }
             // Sukses: tetap tampilkan status memproses sampai halaman utama siap
             Auth.setBusy(true, 'Berhasil! Menyiapkan akunmu...');
         } catch (e) {
@@ -327,6 +370,7 @@ var Auth = {
             Auth.profile = Auth.profile || {};
             Auth.profile.username = newName;
             var nm = document.querySelector('.prof-name'); if (nm) nm.textContent = newName;
+            Auth._trackPresence();
             showToast('Username diperbarui');
             if (typeof Home !== 'undefined' && Home.updateGreeting) Home.updateGreeting();
         } catch (e) { showToast('Gagal menyimpan username'); }

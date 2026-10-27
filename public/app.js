@@ -10,7 +10,7 @@ var App={
             <div id="profile-account-section" class="max-w-sm mx-auto mb-6 text-left"></div>
 
             <div class="glass rounded-2xl p-5 max-w-sm mx-auto space-y-3 text-left mb-6">
-                <h3 class="text-white font-bold text-sm uppercase tracking-wider mb-2">Tentang Aplikasi</h3>
+                <h3 class="text-white font-bold text-sm uppercase tracking-wider mb-2 border-b border-[#333333] pb-2 flex items-center gap-2">Tentang Aplikasi</h3>
                 <div class="flex justify-between"><span class="text-white/70 text-sm">Nama</span><span class="text-white font-medium text-sm">Beatsify</span></div>
                 <div class="flex justify-between"><span class="text-white/70 text-sm">Versi</span><span class="text-white font-medium text-sm">v4.0.0</span></div>
                 <div class="flex justify-between"><span class="text-white/70 text-sm">Dirilis</span><span class="text-white font-medium text-sm">Juni 2026</span></div>

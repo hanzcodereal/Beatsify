@@ -15,6 +15,8 @@ var AI = {
     plus: '<path d="M12 5v14M5 12h14"/>',
     trash: '<path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/>',
     mail: '<rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/>',
+    pulse: '<path d="M22 12h-4l-3 9L9 3l-3 9H2"/>',
+    megaphone: '<path d="m3 11 18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/>',
     refresh: '<path d="M21 12a9 9 0 1 1-3-6.7L21 8"/><path d="M21 3v5h-5"/>'
 };
 function ai(name, cls) {
@@ -117,7 +119,49 @@ var AdminApp = {
         }
     },
 
-    logout() { AdminApp.clearToken(); AdminApp.renderLogin(); },
+    // ---------- Pengguna online (Supabase Realtime Presence) ----------
+    online: {},
+    startOnline() {
+        AdminApp.stopOnline();
+        try {
+            if (!window.sb || !sb.channel) { AdminApp.renderOnline(); return; }
+            var ch = sb.channel('beatsify-online', { config: { presence: { key: 'admin-' + Math.random().toString(36).slice(2) } } });
+            AdminApp._ch = ch;
+            ch.on('presence', { event: 'sync' }, function () {
+                var st = ch.presenceState(), out = {};
+                Object.keys(st).forEach(function (k) {
+                    if (k.indexOf('admin-') === 0) return;
+                    var m = st[k] && st[k][0]; if (m) out[k] = m;
+                });
+                AdminApp.online = out;
+                AdminApp.renderOnline();
+            }).subscribe();
+        } catch (e) { AdminApp.renderOnline(); }
+    },
+    stopOnline() {
+        try { if (AdminApp._ch && window.sb) sb.removeChannel(AdminApp._ch); } catch (e) {}
+        AdminApp._ch = null; AdminApp.online = {};
+    },
+    renderOnline() {
+        var ids = Object.keys(AdminApp.online);
+        var n = gid('stat-online'); if (n) n.textContent = ids.length;
+        var c = gid('online-count'); if (c) c.textContent = ids.length;
+        var el = gid('admin-online'); if (!el) return;
+        if (!ids.length) { el.innerHTML = '<p class="empty">Belum ada pengguna online.</p>'; }
+        else {
+            el.innerHTML = ids.map(function (id) {
+                var u = AdminApp.online[id];
+                return '<div class="olu">' + AdminApp.avatarHTML(u) + '<span class="dot dot-abs"></span>' +
+                    '<div class="olname">' + es(u.username || 'Pengguna') + '</div></div>';
+            }).join('');
+        }
+        // tandai titik hijau di daftar akun
+        document.querySelectorAll('.user[data-id]').forEach(function (r) {
+            r.classList.toggle('is-online', !!AdminApp.online[r.getAttribute('data-id')]);
+        });
+    },
+
+    logout() { AdminApp.stopOnline(); AdminApp.clearToken(); AdminApp.renderLogin(); },
 
     async renderDashboard() {
         var statsRes;
@@ -135,7 +179,12 @@ var AdminApp = {
             </div>
             <div class="stats">
                 <div class="stat"><div class="lbl">${ai('users')} Total Akun</div><div class="num" id="stat-total">${stats.status ? es(stats.totalAccounts) : '-'}</div></div>
+                <div class="stat"><div class="lbl"><span class="dot"></span> Online Sekarang</div><div class="num" id="stat-online">0</div></div>
                 <div class="stat"><div class="lbl">${ai('bell')} Informasi</div><div class="num" id="stat-info">-</div></div>
+            </div>
+            <div class="panel">
+                <div class="panel-h"><h2>${ai('pulse')} Sedang Online <span class="count" id="online-count">0</span></h2></div>
+                <div id="admin-online" class="online"><p class="empty">Menunggu data...</p></div>
             </div>
             <div class="panel">
                 <div class="panel-h">
@@ -167,6 +216,7 @@ var AdminApp = {
         AdminApp.query = '';
         AdminApp.loadUsers(true);
         AdminApp.loadInfoList();
+        AdminApp.startOnline();
         return true;
     },
 
@@ -207,7 +257,7 @@ var AdminApp = {
             list.innerHTML = AdminApp.users.map(function (u) {
                 var d = u.created_at ? new Date(u.created_at) : null;
                 var date = d && !isNaN(d) ? d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }) : '';
-                return '<div class="user">' + AdminApp.avatarHTML(u) +
+                return '<div class="user' + (AdminApp.online[u.id] ? ' is-online' : '') + '" data-id="' + es(u.id) + '">' + AdminApp.avatarHTML(u) + '<span class="dot dot-abs"></span>' +
                     '<div class="meta"><div class="name">' + es(u.username || 'Tanpa nama') + '</div>' +
                     '<div class="mail">' + es(u.email || '-') + '</div></div>' +
                     '<div class="date">' + es(date) + '</div></div>';
@@ -225,8 +275,12 @@ var AdminApp = {
             var n = gid('stat-info'); if (n) n.textContent = (data || []).length;
             if (!data || !data.length) { listEl.innerHTML = '<p class="empty">Belum ada informasi.</p>'; return; }
             listEl.innerHTML = data.map(function (item) {
-                return '<div class="info"><div style="min-width:0"><div class="t">' + es(item.title) + '</div>' +
-                    '<div class="c">' + es(item.content || '') + '</div></div>' +
+                var d = item.created_at ? new Date(item.created_at) : null;
+                var date = d && !isNaN(d) ? d.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }) : '';
+                return '<div class="info"><div class="iic">' + ai('megaphone') + '</div>' +
+                    '<div style="min-width:0;flex:1"><div class="t">' + es(item.title) + '</div>' +
+                    (item.content ? '<div class="c">' + es(item.content) + '</div>' : '') +
+                    '<div class="d">' + es(date) + '</div></div>' +
                     '<button class="del" data-id="' + es(item.id) + '">' + ai('trash') + ' Hapus</button></div>';
             }).join('');
             listEl.querySelectorAll('.del').forEach(function (b) {
