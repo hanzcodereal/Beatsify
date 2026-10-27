@@ -21,7 +21,7 @@ var Search={
         }
     },
     onShow(){if(!S.sq){Search.renderRecs();}},
-    REC_ROWS:[{key:'rec0',label:'Pop Indo Hits',q:'lagu pop indonesia hits terpopuler'},{key:'rec1',label:'Lagu Galau Indonesia',q:'lagu galau indonesia viral'},{key:'rec2',label:'Dangdut & Koplo Viral',q:'dangdut koplo terbaru viral'},{key:'rec3',label:'Akustik Santai Indo',q:'akustik santai indonesia lofi'}],
+    REC_ROWS:[{key:'rec0',label:'Trending di Indonesia',q:'lagu trending indonesia terpopuler hari ini'},{key:'rec1',label:'Hits & Playlist Indonesia',q:'hits playlist lagu indonesia terbaru'},{key:'rec2',label:'Dangdut & Koplo Viral',q:'dangdut koplo terbaru viral'},{key:'rec3',label:'Akustik Santai Indo',q:'akustik santai indonesia lofi'}],
     renderRecs(){
         var rc=gid('search-recs');if(!rc)return;
         if(S.rec0&&S.rec1&&S.rec2&&S.rec3){Search.showRecs();return;}

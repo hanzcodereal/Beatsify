@@ -96,7 +96,7 @@ var Home = {
                     <div>
                         <h2 class="text-base font-bold mb-3 flex items-center gap-2">
                             <span class="w-1.5 h-4 bg-white/90 rounded-full inline-block"></span>
-                            <span class="chrome-text">Artis Teratas Indonesia</span>
+                            <span class="chrome-text">Artis Teratas</span>
                         </h2>
                         <div id="home-artists" class="flex gap-4 overflow-x-auto hide-scrollbar pb-4"></div>
                     </div>
