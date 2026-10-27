@@ -28,6 +28,7 @@ app.all('/api/ytplay', require('./api/ytplay.js'));
 const adminHandler = require('./api/admin.js');
 app.all('/api/admin-login', (req, res) => { req.query.action = 'login'; return adminHandler(req, res); });
 app.all('/api/admin-stats', (req, res) => { req.query.action = 'stats'; return adminHandler(req, res); });
+app.all('/api/admin-users', (req, res) => { req.query.action = 'users'; return adminHandler(req, res); });
 app.all('/api/admin-info', (req, res) => { req.query.action = 'info'; return adminHandler(req, res); });
 
 app.get('/admin', (req, res) => {
