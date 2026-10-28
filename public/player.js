@@ -52,8 +52,17 @@ var AU=gid('audio-player');
 if(!AU){AU=document.createElement('audio');AU.id='audio-player';AU.preload='auto';AU.style.display='none';document.body.appendChild(AU);}
 try{var storedVolume=localStorage.getItem('hanz_volume');if(storedVolume!==null){AU.volume=Math.max(0,Math.min(100,parseInt(storedVolume,10)))/100;}}catch(e){}
 AU.addEventListener('timeupdate',function(){if(!AU.paused){S.pt=AU.currentTime||0;S.pd=AU.duration||0;renderProgress();}});
-AU.addEventListener('play',function(){S.ip=true;S.il=false;UB();SP();try{AU.playbackRate=S.playbackRate||1.0;}catch(ex){}});
-AU.addEventListener('pause',function(){if(!AU.ended){S.ip=false;UB();ST();}});
+AU.addEventListener('play',function(){S._userPaused=false;resumeAudioCtx();S.ip=true;S.il=false;UB();SP();try{AU.playbackRate=S.playbackRate||1.0;}catch(ex){}});
+AU.addEventListener('pause',function(){
+    if(AU.ended)return;
+    // Pause yang bukan dari pengguna (AudioContext ditangguhkan sistem, dll.) -> lanjutkan otomatis
+    if(!S._userPaused&&S.ct&&!document.hidden&&audioCtx&&audioCtx.state!=='running'&&(S._autoResume||0)<5){
+        S._autoResume=(S._autoResume||0)+1;
+        Promise.resolve(resumeAudioCtx()).then(function(){if(AU.paused&&!S._userPaused)AU.play().catch(function(){});});
+        return;
+    }
+    S.ip=false;UB();ST();
+});
 AU.addEventListener('waiting',function(){S.il=true;UB();});
 AU.addEventListener('playing',function(){S.il=false;UB();});
 AU.addEventListener('ended',function(){ST();if(handleTrackEnded())return;if(S.rm==='one'){AU.currentTime=0;AU.play().catch(function(){});}else if(S.autoNext){NX();}else{S.ip=false;UB();}});
@@ -302,6 +311,8 @@ function PK(s,i){
 
 function loadTrack(track,resumeAt){
     if(!track)return;
+    if(!resumeAt){S._autoResume=0;}
+    S._userPaused=true; // pause berikutnya disengaja (ganti lagu); event 'play' akan menghapusnya
     ST();
     try{AU.pause();}catch(e){}
     addToHistory(track);
@@ -309,7 +320,8 @@ function loadTrack(track,resumeAt){
     fetchAudioAndPlay(track,resumeAt);
 }
 
-async function fetchAudioAndPlay(track,resumeAt){
+async function fetchAudioAndPlay(track,resumeAt,autoplay){
+    if(autoplay===undefined)autoplay=true;
     S.il=true;UB();
     var vid=track.videoId||track.id;
     var ytUrl=track.ytUrl||('https://youtube.com/watch?v='+vid);
@@ -343,29 +355,35 @@ async function fetchAudioAndPlay(track,resumeAt){
         if(S.ct!==track)return;
         if(!fellBack&&streamUrl){
             fellBack=true;
-            try{AU.removeAttribute('crossorigin');}catch(e){}
-            AU.src=streamUrl;
-            AU.play().catch(function(){S.il=false;S.ip=false;UB();});
+            if(audioCtx){
+                // Dengan Equalizer, URL langsung (tanpa CORS) akan bisu; coba ulang lewat proxy.
+                AU.src=playUrl;
+                AU.play().catch(function(){S.il=false;S.ip=false;UB();});
+            }else{
+                try{AU.removeAttribute('crossorigin');}catch(e){}
+                AU.src=streamUrl;
+                AU.play().catch(function(){S.il=false;S.ip=false;UB();});
+            }
         }else{
             S.audioFor='';S.il=false;S.ip=false;UB();
         }
     };
-    if(isDirect||!audioCtx){
-        AU.removeAttribute('crossorigin');
-    }
+    if(audioCtx){AU.crossOrigin='anonymous';}
+    else{AU.removeAttribute('crossorigin');}
     S.audioFor=vid;
     AU.src=(audioCtx||isDirect)?playUrl:streamUrl;
     if(resumeAt){
-        var onMeta=function(){AU.currentTime=resumeAt;AU.removeEventListener('loadedmetadata',onMeta);};
+        var onMeta=function(){try{AU.currentTime=resumeAt;}catch(e){}AU.removeEventListener('loadedmetadata',onMeta);};
         AU.addEventListener('loadedmetadata',onMeta);
     }
-    AU.play().catch(function(){});
+    if(autoplay){resumeAudioCtx();AU.play().catch(function(){});}
+    else{S.il=false;S.ip=false;UB();}
 }
 
 function TP(){
     if(!S.ct)return;
     if(!AU.src)return;
-    if(AU.paused)AU.play().catch(function(){});else AU.pause();
+    if(AU.paused){S._userPaused=false;resumeAudioCtx();AU.play().catch(function(){});}else{S._userPaused=true;AU.pause();}
 }
 function NX(){
     if(!S.pl || !S.pl.length)return;
@@ -951,29 +969,46 @@ var filters = [];
 
 function setupWebAudioEQ() {
     if (audioCtx) return;
+    var ctx = null, src = null;
     try {
         var AudioContextClass = window.AudioContext || window.webkitAudioContext;
         if (!AudioContextClass) return;
-        audioCtx = new AudioContextClass();
         var AU_el = gid('audio-player');
         if (!AU_el) return;
+        ctx = new AudioContextClass();
         AU_el.crossOrigin = "anonymous";
-        sourceNode = audioCtx.createMediaElementSource(AU_el);
+        src = ctx.createMediaElementSource(AU_el);
+    } catch(e) {
+        try { if (ctx) ctx.close(); } catch(e2) {}
+        return;
+    }
+    // Dari sini elemen audio sudah "ditangkap" AudioContext: apa pun yang terjadi, suara harus tetap tersambung ke speaker.
+    var last = src;
+    try {
         var freqs = [60, 230, 910, 4000, 14000];
-        var lastNode = sourceNode;
-        filters = freqs.map(function(f, idx) {
-            var filter = audioCtx.createBiquadFilter();
+        var built = freqs.map(function(f, idx) {
+            var filter = ctx.createBiquadFilter();
             filter.type = idx === 0 ? 'lowshelf' : (idx === 4 ? 'highshelf' : 'peaking');
             filter.frequency.value = f;
             filter.Q.value = 1.0;
             filter.gain.value = S.eqBands ? S.eqBands[idx] : 0;
-            lastNode.connect(filter);
-            lastNode = filter;
             return filter;
         });
-        lastNode.connect(audioCtx.destination);
-    } catch(e) {}
+        var node = src;
+        built.forEach(function(fl) { node.connect(fl); node = fl; });
+        last = node; filters = built;
+    } catch(e) { filters = []; last = src; try { src.disconnect(); } catch(e3) {} last = src; }
+    try { last.connect(ctx.destination); } catch(e) { try { src.connect(ctx.destination); } catch(e4) {} }
+    audioCtx = ctx; sourceNode = src;
+    // iOS/Android bisa menangguhkan AudioContext (layar mati, panggilan, tab di latar) -> suara hilang. Pulihkan otomatis.
+    try { ctx.onstatechange = function() { if (ctx.state !== 'running' && S.ip && !S._userPaused) resumeAudioCtx(); }; } catch(e) {}
 }
+
+function resumeAudioCtx() {
+    try { if (audioCtx && audioCtx.state !== 'running' && audioCtx.resume) return audioCtx.resume().catch(function(){}); } catch(e) {}
+}
+document.addEventListener('visibilitychange', function() { if (!document.hidden) resumeAudioCtx(); });
+['touchstart', 'click', 'keydown'].forEach(function(ev) { document.addEventListener(ev, resumeAudioCtx, { passive: true }); });
 
 function updateEQGain(bandIdx, gainValue) {
     if (!S.eqBands) S.eqBands = [0, 0, 0, 0, 0];
@@ -1052,6 +1087,7 @@ function triggerSleep() {
     S.sleepEndWithTrack = false;
     updateSleepBadge();
     if (AU) {
+        S._userPaused = true;
         try { AU.pause(); } catch(e){}
     }
     S.ip = false;
@@ -1198,10 +1234,13 @@ function openEqualizer() {
     if (!S.activePreset) S.activePreset = 'Normal';
     var hadAudioCtx = !!audioCtx;
     setupWebAudioEQ();
-    if (!hadAudioCtx && audioCtx && S.ct && !AU.paused) {
+    if (!hadAudioCtx && audioCtx && S.ct && AU.src) {
+        resumeAudioCtx();
+        var wasPlaying = !AU.paused;
         var currTime = AU.currentTime;
         showToast('Mengaktifkan Equalizer...');
-        loadTrack(S.ct, currTime);
+        S._userPaused = !wasPlaying;
+        fetchAudioAndPlay(S.ct, currTime, wasPlaying);
     }
     var popup = document.createElement('div');
     popup.id = 'equalizer-popup';

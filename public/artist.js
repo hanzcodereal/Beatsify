@@ -120,7 +120,7 @@ var Artist={
                             btnIcon = '<i data-lucide="play" class="w-5 h-5 text-white/70 group-hover:text-white fill-current"></i>';
                         }
 
-                        var rowBg = isPlay ? 'bg-white/15 border border-[#3f3f3f] shadow-md' : (isCur ? 'bg-white/10 border border-[#3a3a3a]' : 'hover:bg-white/5 border border-transparent');
+                        var rowBg = isPlay ? 'bg-white/15 border border-[#3f3f3f] shadow-md' : (isCur ? 'bg-white/10 border border-[#3a3a3a]' : 'hover:bg-white/5 border border-[#3a3a3a]');
                         var titleClass = isCur ? 'text-white font-bold' : 'text-white/90 font-medium';
 
                         html+=`
@@ -147,7 +147,7 @@ var Artist={
                         }
                         html+=`
                         <div onclick="Album.open('${al.browseId}', '${esJs(im)}')" class="flex-shrink-0 w-36 cursor-pointer group">
-                            <div class="w-36 h-36 rounded-xl overflow-hidden  mb-2">
+                            <div class="w-36 h-36 rounded-xl overflow-hidden mb-2 border border-[#3a3a3a] group-hover:border-[#5a5a5a] transition-colors">
                                 <img src="${im}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" onerror="this.src='${FI}'" />
                             </div>
                             <p class="font-medium text-sm truncate group-hover:text-white transition-colors">${es(al.name)}</p>
@@ -167,7 +167,7 @@ var Artist={
                         }
                         html+=`
                         <div onclick="Album.open('${sg.browseId}', '${esJs(im)}')" class="flex-shrink-0 w-36 cursor-pointer group">
-                            <div class="w-36 h-36 rounded-xl overflow-hidden  mb-2">
+                            <div class="w-36 h-36 rounded-xl overflow-hidden mb-2 border border-[#3a3a3a] group-hover:border-[#5a5a5a] transition-colors">
                                 <img src="${im}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" onerror="this.src='${FI}'" />
                             </div>
                             <p class="font-medium text-sm truncate group-hover:text-white transition-colors">${es(sg.name)}</p>
@@ -177,26 +177,7 @@ var Artist={
                     html+='</div></div>';
                 }
                 
-                if(a.topVideos&&a.topVideos.length>0){
-                    html+='<div class="mb-6"><h3 class="font-bold text-sm text-[#b3b3b3] uppercase tracking-wider mb-3 px-4">Video</h3><div class="flex gap-3 overflow-x-auto hide-scrollbar pb-2 px-4">';
-                    a.topVideos.forEach(function(vd){
-                        var im=FI;
-                        if(vd.thumbnails && vd.thumbnails.length > 0) {
-                            var lastT = vd.thumbnails[vd.thumbnails.length - 1];
-                            im = typeof lastT === 'string' ? lastT : (lastT.url || lastT.src || FI);
-                        }
-                        html+=`
-                        <div onclick="Artist.play('${vd.videoId||''}','${esJs(vd.name)}','${esJs(vd.artist||a.name)}','${esJs(im)}')" class="flex-shrink-0 w-44 cursor-pointer group">
-                            <div class="w-44 h-24 rounded-xl overflow-hidden  mb-2 relative">
-                                <img src="${im}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" onerror="this.src='${FI}'" />
-                                <div class="absolute bottom-2 right-2 bg-black/70 rounded-full p-1.5"><i data-lucide="play" class="w-4 h-4 fill-current text-white"></i></div>
-                            </div>
-                            <p class="font-medium text-sm truncate group-hover:text-white transition-colors">${es(vd.name)}</p>
-                            <p class="text-white/70 text-xs">${es(vd.artist||a.name)}</p>
-                        </div>`;
-                    });
-                    html+='</div></div>';
-                }
+
                 
                 if(a.playlists&&a.playlists.length>0){
                     html+='<div class="mb-6"><h3 class="font-bold text-sm text-[#b3b3b3] uppercase tracking-wider mb-3 px-4">Playlist</h3><div class="flex gap-3 overflow-x-auto hide-scrollbar pb-2 px-4">';
@@ -208,7 +189,7 @@ var Artist={
                         }
                         html+=`
                         <div onclick="Album.open('${pl.browseId}', '${esJs(im)}')" class="flex-shrink-0 w-36 cursor-pointer group">
-                            <div class="w-36 h-36 rounded-xl overflow-hidden  mb-2">
+                            <div class="w-36 h-36 rounded-xl overflow-hidden mb-2 border border-[#3a3a3a] group-hover:border-[#5a5a5a] transition-colors">
                                 <img src="${im}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" onerror="this.src='${FI}'" />
                             </div>
                             <p class="font-medium text-sm truncate group-hover:text-white">${es(pl.name)}</p>
@@ -227,7 +208,7 @@ var Artist={
                         }
                         html+=`
                         <div onclick="Album.open('${fo.browseId}', '${esJs(im)}')" class="flex-shrink-0 w-36 cursor-pointer group">
-                            <div class="w-36 h-36 rounded-xl overflow-hidden  mb-2">
+                            <div class="w-36 h-36 rounded-xl overflow-hidden mb-2 border border-[#3a3a3a] group-hover:border-[#5a5a5a] transition-colors">
                                 <img src="${im}" class="w-full h-full object-cover" onerror="this.src='${FI}'" />
                             </div>
                             <p class="font-medium text-sm truncate">${es(fo.name)}</p>
@@ -247,7 +228,7 @@ var Artist={
                         }
                         html+=`
                         <div onclick="Artist.open('${s.browseId}','${esJs(s.name)}')" class="flex-shrink-0 text-center cursor-pointer group">
-                            <div class="w-24 h-24 rounded-full overflow-hidden  ring-2 ring-transparent group-hover:ring-[#cfd3d8]/50 transition-all">
+                            <div class="w-24 h-24 rounded-full overflow-hidden border-2 border-[#3a3a3a] group-hover:border-[#8a8a8a] transition-all">
                                 <img src="${im}" class="w-full h-full object-cover" onerror="this.src='${FI}'" />
                             </div>
                             <p class="text-xs mt-2 truncate w-24 group-hover:text-white transition-colors">${es(s.name)}</p>
@@ -306,7 +287,7 @@ var Artist={
             var btnDiv = el.children[3];
             if (btnDiv) btnDiv.innerHTML = btnIcon;
 
-            var rowBg = isPlay ? 'bg-white/15 border border-[#3f3f3f] shadow-md' : (isCur ? 'bg-white/10 border border-[#3a3a3a]' : 'hover:bg-white/5 border border-transparent');
+            var rowBg = isPlay ? 'bg-white/15 border border-[#3f3f3f] shadow-md' : (isCur ? 'bg-white/10 border border-[#3a3a3a]' : 'hover:bg-white/5 border border-[#3a3a3a]');
             el.className = 'flex items-center gap-3 p-3 rounded-xl cursor-pointer active:scale-[0.98] transition-all group ' + rowBg;
 
             var titleEl = el.querySelector('p');
