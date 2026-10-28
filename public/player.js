@@ -59,7 +59,7 @@ try{
     AU.volume=Math.min(1,S.vol);
 }catch(e){}
 function bindAudioEvents(){
-AU.addEventListener('timeupdate',function(){if(!AU.paused){S.pt=AU.currentTime||0;S.pd=AU.duration||0;renderProgress();}});
+AU.addEventListener('timeupdate',function(){if(!AU.paused){S.pt=AU.currentTime||0;S.pd=AU.duration||0;renderProgress();if(S.pt>3&&S._pfFor!==S.audioFor){S._pfFor=S.audioFor;prefetchNext();}}});
 AU.addEventListener('play',function(){S._userPaused=false;S.ip=true;S.il=false;UB();SP();try{AU.playbackRate=S.playbackRate||1.0;}catch(ex){}});
 AU.addEventListener('pause',function(){if(!AU.ended){S.ip=false;UB();ST();}});
 AU.addEventListener('waiting',function(){S.il=true;UB();});
@@ -322,10 +322,19 @@ function loadTrack(track,resumeAt){
     fetchAudioAndPlay(track,resumeAt);
 }
 
-async function fetchAudioAndPlay(track,resumeAt,autoplay){
-    if(autoplay===undefined)autoplay=true;
-    S.il=true;UB();
+// ---------- Alamat stream: cache + prefetch lagu berikutnya ----------
+// Saat layar HP mati, jeda saat mengambil alamat lagu berikutnya bisa membuat browser menghentikan musik.
+// Karena itu alamat lagu berikutnya diambil lebih dulu sehingga pergantian lagu bisa langsung (tanpa menunggu jaringan).
+var _streamCache={};
+function cachedStream(vid){
+    var c=_streamCache[vid];
+    if(c&&Date.now()-c.at<20*60*1000)return c.url;
+    return '';
+}
+async function resolveStreamUrl(track){
     var vid=track.videoId||track.id;
+    var hit=cachedStream(vid);
+    if(hit)return hit;
     var ytUrl=track.ytUrl||('https://youtube.com/watch?v='+vid);
     var streamUrl='';
     try{
@@ -337,12 +346,50 @@ async function fetchAudioAndPlay(track,resumeAt,autoplay){
         if(d&&d.status&&d.result&&d.result.download&&d.result.download.audio){streamUrl=d.result.download.audio;}
         else if(d&&d.url){streamUrl=d.url;}
     }catch(e){}
-    if(S.ct!==track)return;
     if(!streamUrl&&typeof ClientExtractor!=='undefined'){
         try{
             var cr=await ClientExtractor.extract(vid,ytUrl);
             if(cr&&cr.audioUrl)streamUrl=cr.audioUrl;
         }catch(e){}
+    }
+    if(streamUrl){
+        _streamCache[vid]={url:streamUrl,at:Date.now()};
+        var keys=Object.keys(_streamCache);
+        if(keys.length>12)delete _streamCache[keys[0]];
+    }
+    return streamUrl;
+}
+// Tentukan lagu berikutnya lebih awal (juga untuk mode acak) lalu siapkan alamat stream-nya.
+function pickNextIndex(){
+    if(!S.pl||!S.pl.length)return -1;
+    if(S._nextFor===S.pi&&S._nextPl===S.pl&&S._nextIdx>=0&&S.pl[S._nextIdx])return S._nextIdx;
+    var ni;
+    if(S.isShuffle&&S.pl.length>1){
+        ni=S.pi;var at=0;
+        while(ni===S.pi&&at<10){ni=Math.floor(Math.random()*S.pl.length);at++;}
+    }else{
+        ni=S.pi+1;if(ni>=S.pl.length)ni=0;
+    }
+    S._nextFor=S.pi;S._nextPl=S.pl;S._nextIdx=ni;
+    return ni;
+}
+function prefetchNext(){
+    try{
+        if(!S.autoNext||S.rm==='one')return;
+        var ni=pickNextIndex();
+        if(ni<0||ni===S.pi)return;
+        var t=S.pl[ni];
+        if(t&&!cachedStream(t.videoId||t.id))resolveStreamUrl(t);
+    }catch(e){}
+}
+
+async function fetchAudioAndPlay(track,resumeAt,autoplay){
+    if(autoplay===undefined)autoplay=true;
+    S.il=true;UB();
+    var vid=track.videoId||track.id;
+    var streamUrl=cachedStream(vid);
+    if(!streamUrl){
+        streamUrl=await resolveStreamUrl(track);
         if(S.ct!==track)return;
     }
     if(!streamUrl){
@@ -382,19 +429,10 @@ function TP(){
 }
 function NX(){
     if(!S.pl || !S.pl.length)return;
-    if(S.isShuffle && S.pl.length > 1){
-        var ri = S.pi;
-        var attempts = 0;
-        while(ri === S.pi && attempts < 10){
-            ri = Math.floor(Math.random() * S.pl.length);
-            attempts++;
-        }
-        PK(S.ps, ri);
-    } else {
-        var ni = S.pi + 1;
-        if(ni >= S.pl.length){ ni = 0; }
-        PK(S.ps, ni);
-    }
+    var ni=pickNextIndex();
+    if(ni<0)return;
+    S._nextIdx=-1;
+    PK(S.ps, ni);
 }
 function PV(){
     if(!S.pl || !S.pl.length)return;
@@ -975,12 +1013,22 @@ function volIconSvg(muted) {
     return '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4V5z"/>' +
         (muted ? '<path d="m22 9-6 6M16 9l6 6"/>' : '<path d="M15.5 8.5a5 5 0 0 1 0 7M19 5a10 10 0 0 1 0 14"/>') + '</svg>';
 }
+function volChipsHtml() {
+    var pct = Math.round(S.vol * 100);
+    return [0, 25, 50, 75, 100].map(function(v) {
+        var sel = pct === v;
+        var cls = sel ? 'bg-[#cfd3d8] text-black font-bold border-[#cfd3d8]' : 'bg-white/5 hover:bg-white/10 text-white border-[#2a2a2a]';
+        var label = v === 0 ? '0% (Bisu)' : (v === 100 ? '100% (Maksimal)' : v + '%');
+        return '<button onclick="setVolumeLevel(' + v + ')" class="w-full py-3.5 px-4 rounded-2xl border text-sm font-medium active:scale-98 transition-all flex items-center justify-between ' + cls + '">' +
+            '<span>' + label + '</span>' + (sel ? '<i data-lucide="check" class="w-4 h-4 text-black"></i>' : '') + '</button>';
+    }).join('');
+}
 function updateVolumeUI() {
     var pct = Math.round(S.vol * 100);
-    var fill = gid('vol-fill'); if (fill) fill.style.width = pct + '%';
     var lbl = gid('vol-pct'); if (lbl) lbl.textContent = pct + '%';
     var inp = gid('vol-input'); if (inp && parseFloat(inp.value) !== pct) inp.value = pct;
     var ic = gid('vol-icon'); if (ic) ic.innerHTML = volIconSvg(S.vol === 0);
+    var ch = gid('vol-chips'); if (ch) { ch.innerHTML = volChipsHtml(); if (typeof lucide !== 'undefined' && lucide.createIcons) lucide.createIcons(); }
 }
 
 function handleTrackEnded() {
@@ -1189,30 +1237,30 @@ function closePlaybackSpeed() {
 }
 
 function openVolume() {
-    if (document.getElementById('volume-popup')) return;
+    if (gid('volume-popup')) return;
     var pct = Math.round(S.vol * 100);
     var popup = document.createElement('div');
     popup.id = 'volume-popup';
-    popup.className = 'fixed inset-0 z-[300] flex items-center justify-center p-4 bg-black/70';
-    popup.style.backdropFilter = 'blur(4px)';
+    popup.className = 'fixed inset-0 z-[300] flex items-end justify-center bg-black/60';
     popup.onclick = function(e) { if (e.target === popup) closeVolume(); };
-    popup.innerHTML =
-        '<div onclick="event.stopPropagation()" class="glass-strong rounded-3xl p-6 max-w-sm w-full space-y-5 border border-white/10" style="background: var(--bg-color); animation: slideUp 0.3s ease-out forwards;">' +
-            '<div class="flex items-center justify-between border-b border-white/10 pb-3">' +
-                '<h3 class="font-bold text-white text-base">Volume</h3>' +
-                '<button type="button" onclick="closeVolume()" class="text-white/60 hover:text-white text-xs px-2.5 py-1 rounded-full bg-white/5 cursor-pointer">Tutup</button>' +
+    popup.innerHTML = '<div class="w-full max-w-md rounded-t-3xl p-6 border-t border-[#333333] glass-strong" style="animation:slideUp 0.3s ease-out forwards; background: var(--bg-color); max-height: 80vh; overflow-y: auto;">' +
+        '<div class="w-10 h-1 bg-white/20 rounded-full mx-auto mb-4"></div>' +
+        '<div class="flex justify-between items-center mb-5">' +
+            '<div>' +
+                '<h3 class="font-black text-white text-lg">Volume</h3>' +
+                '<p class="text-[#6b7280] text-xs">Atur keras suara lagu sesuai seleramu</p>' +
             '</div>' +
-            '<div class="flex items-center gap-3 px-1">' +
-                '<button type="button" id="vol-icon" onclick="toggleMuteVolume()" aria-label="Bisukan / nyalakan suara" class="text-white/70 hover:text-white transition cursor-pointer p-1 rounded-full active:scale-90 shrink-0" style="background:none;border:0">' + volIconSvg(S.vol === 0) + '</button>' +
-                '<div class="relative flex-1 rounded-full cursor-pointer" style="height:6px;border-radius:999px;background:rgba(255,255,255,.2);position:relative;flex:1">' +
-                    '<input id="vol-input" type="range" min="0" max="100" value="' + pct + '" aria-label="Tingkat volume" oninput="setVolumeLevel(this.value)" style="position:absolute;left:0;top:-12px;width:100%;height:30px;opacity:0;cursor:pointer;margin:0;z-index:2" />' +
-                    '<div id="vol-fill" style="height:100%;border-radius:999px;background:#fff;width:' + pct + '%"></div>' +
-                '</div>' +
-                '<span id="vol-pct" class="text-xs text-white/90 font-mono font-semibold w-10 text-right shrink-0">' + pct + '%</span>' +
-            '</div>' +
-            '<button type="button" onclick="closeVolume()" class="w-full btn-chrome py-2.5 rounded-xl font-bold text-xs cursor-pointer">Selesai</button>' +
-        '</div>';
+            '<button onclick="closeVolume()" class="text-[#6b7280] hover:text-white p-1" aria-label="Tutup"><i data-lucide="x" class="w-5 h-5"></i></button>' +
+        '</div>' +
+        '<div class="w-full py-4 px-4 rounded-2xl border border-[#2a2a2a] bg-white/5 flex items-center gap-3 mb-3">' +
+            '<button id="vol-icon" onclick="toggleMuteVolume()" aria-label="Bisukan / nyalakan suara" class="text-white/80 hover:text-white p-1 active:scale-90 transition shrink-0" style="background:none;border:0">' + volIconSvg(S.vol === 0) + '</button>' +
+            '<input id="vol-input" type="range" min="0" max="100" value="' + pct + '" aria-label="Tingkat volume" oninput="setVolumeLevel(this.value)" class="flex-1" style="accent-color:#cfd3d8;height:28px;cursor:pointer;min-width:0" />' +
+            '<span id="vol-pct" class="text-sm text-white font-bold w-11 text-right shrink-0">' + pct + '%</span>' +
+        '</div>' +
+        '<div id="vol-chips" class="flex flex-col gap-2 mb-4">' + volChipsHtml() + '</div>' +
+    '</div>';
     document.body.appendChild(popup);
+    if (typeof lucide !== 'undefined' && lucide.createIcons) lucide.createIcons();
 }
 
 function closeVolume() {
