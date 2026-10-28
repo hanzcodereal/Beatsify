@@ -278,7 +278,7 @@ var FullPlayer={
                 </button>
                 <button onclick="gid('full-more-sheet').remove();openEqualizer();" class="flex flex-col items-center gap-1.5 p-3 rounded-2xl bg-white/5 hover:bg-white/10 active:scale-95 transition cursor-pointer">
                     <i data-lucide="sliders" class="w-5 h-5 text-white"></i>
-                    <span class="text-xs font-semibold text-white/90">EQ</span>
+                    <span class="text-xs font-semibold text-white/90">Equalizer</span>
                 </button>
                 <button onclick="gid('full-more-sheet').remove();openSleepTimer();" class="flex flex-col items-center gap-1.5 p-3 rounded-2xl bg-white/5 hover:bg-white/10 active:scale-95 transition cursor-pointer">
                     <i data-lucide="clock" class="w-5 h-5 text-white"></i>

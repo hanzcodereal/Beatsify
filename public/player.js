@@ -50,7 +50,15 @@ function updateOG(title,image){
 
 var AU=gid('audio-player');
 if(!AU){AU=document.createElement('audio');AU.id='audio-player';AU.preload='auto';AU.style.display='none';document.body.appendChild(AU);}
-try{var storedVolume=localStorage.getItem('hanz_volume');if(storedVolume!==null){AU.volume=Math.max(0,Math.min(100,parseInt(storedVolume,10)))/100;}}catch(e){}
+S.vol=1;
+try{
+    var sv=localStorage.getItem('beatsify_volume');
+    if(sv!==null){S.vol=Math.max(0,Math.min(1.5,parseFloat(sv)));}
+    else{var ov=localStorage.getItem('hanz_volume');if(ov!==null){S.vol=Math.max(0,Math.min(100,parseInt(ov,10)))/100;}}
+    if(isNaN(S.vol))S.vol=1;
+    AU.volume=Math.min(1,S.vol);
+}catch(e){}
+function bindAudioEvents(){
 AU.addEventListener('timeupdate',function(){if(!AU.paused){S.pt=AU.currentTime||0;S.pd=AU.duration||0;renderProgress();}});
 AU.addEventListener('play',function(){S._userPaused=false;resumeAudioCtx();S.ip=true;S.il=false;UB();SP();try{AU.playbackRate=S.playbackRate||1.0;}catch(ex){}});
 AU.addEventListener('pause',function(){
@@ -67,6 +75,24 @@ AU.addEventListener('waiting',function(){S.il=true;UB();});
 AU.addEventListener('playing',function(){S.il=false;UB();});
 AU.addEventListener('ended',function(){ST();if(handleTrackEnded())return;if(S.rm==='one'){AU.currentTime=0;AU.play().catch(function(){});}else if(S.autoNext){NX();}else{S.ip=false;UB();}});
 AU.addEventListener('error',function(){if(AU.src&&!AU.onerror){S.il=false;S.ip=false;UB();}});
+    if(typeof MediaNotif!=='undefined'&&MediaNotif.attach)MediaNotif.attach();
+}
+bindAudioEvents();
+
+// Ganti elemen <audio> dengan yang baru (elemen yang sudah ditangkap AudioContext tidak bisa dilepas).
+function swapAudioElement(){
+    var old=AU,vol=1,rate=1;
+    try{vol=old.volume;rate=old.playbackRate;}catch(e){}
+    try{old.pause();old.removeAttribute('src');old.load();}catch(e){}
+    var el=document.createElement('audio');el.preload='auto';el.style.display='none';
+    try{old.parentNode.replaceChild(el,old);}catch(e){document.body.appendChild(el);}
+    el.id='audio-player';
+    try{el.volume=vol;}catch(e){}
+    AU=el;
+    bindAudioEvents();
+    try{if(audioCtx)audioCtx.close();}catch(e){}
+    audioCtx=null;sourceNode=null;eqNodes={};preampNode=null;compNode=null;
+}
 
 function SP(){
     ST();
@@ -350,28 +376,47 @@ async function fetchAudioAndPlay(track,resumeAt,autoplay){
     }
     var isDirect=streamUrl.indexOf('vidssave.com')>-1||streamUrl.indexOf('aliyuncs.com')>-1;
     var playUrl=isDirect?streamUrl:'/api/proxy-audio?url='+encodeURIComponent(streamUrl);
-    var fellBack=false;
+    var stage=0; // 0 = percobaan pertama, 1 = fallback, 2 = menyerah
+    var useCtx=!!audioCtx;
+    var tryPlay=function(url){
+        AU.src=url;
+        if(autoplay||stage>0){AU.play().catch(function(){});}
+    };
     AU.onerror=function(){
         if(S.ct!==track)return;
-        if(!fellBack&&streamUrl){
-            fellBack=true;
-            if(audioCtx){
-                // Dengan Equalizer, URL langsung (tanpa CORS) akan bisu; coba ulang lewat proxy.
-                AU.src=playUrl;
-                AU.play().catch(function(){S.il=false;S.ip=false;UB();});
-            }else{
-                try{AU.removeAttribute('crossorigin');}catch(e){}
-                AU.src=streamUrl;
-                AU.play().catch(function(){S.il=false;S.ip=false;UB();});
+        stage++;
+        if(useCtx){
+            if(stage===1){
+                // Dengan Equalizer: URL langsung hanya jalan bila server mengizinkan CORS; jika gagal coba lewat proxy.
+                AU.crossOrigin='anonymous';
+                tryPlay(playUrl===streamUrl?'/api/proxy-audio?url='+encodeURIComponent(streamUrl):playUrl);
+                return;
             }
+            // Proxy juga gagal: lepas Equalizer supaya lagu tetap bisa diputar.
+            S.eqUnsupported=true;
+            swapAudioElement();
+            S.audioFor=vid;
+            useCtx=false;
+            AU.onerror=function(){if(S.ct===track){S.audioFor='';S.il=false;S.ip=false;UB();}};
+            AU.src=streamUrl;
+            var ra=resumeAt;
+            if(ra){var om=function(){try{AU.currentTime=ra;}catch(e){}AU.removeEventListener('loadedmetadata',om);};AU.addEventListener('loadedmetadata',om);}
+            AU.play().catch(function(){});
+            if(typeof showToast==='function')showToast('Equalizer tidak bisa dipakai untuk lagu ini, dimatikan');
+            return;
+        }
+        if(stage===1&&streamUrl){
+            try{AU.removeAttribute('crossorigin');}catch(e){}
+            tryPlay(streamUrl);
         }else{
             S.audioFor='';S.il=false;S.ip=false;UB();
         }
     };
-    if(audioCtx){AU.crossOrigin='anonymous';}
+    if(useCtx){AU.crossOrigin='anonymous';}
     else{AU.removeAttribute('crossorigin');}
     S.audioFor=vid;
-    AU.src=(audioCtx||isDirect)?playUrl:streamUrl;
+    // Tanpa EQ: host vidssave/aliyuncs lewat proxy (perilaku lama). Dengan EQ: coba langsung (CORS) dulu, lalu proxy.
+    AU.src=useCtx?streamUrl:(isDirect?playUrl:streamUrl);
     if(resumeAt){
         var onMeta=function(){try{AU.currentTime=resumeAt;}catch(e){}AU.removeEventListener('loadedmetadata',onMeta);};
         AU.addEventListener('loadedmetadata',onMeta);
@@ -965,8 +1010,36 @@ function showPlaylistPicker(track){
 
 var audioCtx = null;
 var sourceNode = null;
-var filters = [];
+var eqNodes = {};
+var preampNode = null;
+var compNode = null;
 
+var EQ_PRESETS = {
+    'Normal': [0, 0, 0],
+    'Bass Boost': [6, 1, -1],
+    'Treble': [-1, 0, 6],
+    'Vocal': [-2, 5, 2],
+    'Electronic': [5, 1, 4],
+    'Rock': [4, 2, 4],
+    'Pop': [2, 3, 2]
+};
+
+function loadEqState() {
+    var d = { bass: 0, mid: 0, treble: 0, preset: 'Normal', preamp: 1.8 };
+    try {
+        var r = JSON.parse(localStorage.getItem('beatsify_eq') || 'null');
+        if (r && typeof r === 'object') {
+            ['bass', 'mid', 'treble'].forEach(function(k) { if (typeof r[k] === 'number') d[k] = Math.max(-10, Math.min(10, r[k])); });
+            if (typeof r.preset === 'string') d.preset = r.preset;
+            if (typeof r.preamp === 'number') d.preamp = Math.max(1, Math.min(2.5, r.preamp));
+        }
+    } catch(e) {}
+    return d;
+}
+function saveEqState() { try { localStorage.setItem('beatsify_eq', JSON.stringify(S.eq)); } catch(e) {} }
+if (!S.eq) S.eq = loadEqState();
+
+// Rantai audio (sama seperti NanzMusify): sumber -> bass -> mid -> treble -> preamp -> compressor -> speaker
 function setupWebAudioEQ() {
     if (audioCtx) return;
     var ctx = null, src = null;
@@ -982,23 +1055,21 @@ function setupWebAudioEQ() {
         try { if (ctx) ctx.close(); } catch(e2) {}
         return;
     }
-    // Dari sini elemen audio sudah "ditangkap" AudioContext: apa pun yang terjadi, suara harus tetap tersambung ke speaker.
-    var last = src;
+    // Dari sini elemen audio sudah "ditangkap" AudioContext: suara harus tetap tersambung ke speaker apa pun yang terjadi.
     try {
-        var freqs = [60, 230, 910, 4000, 14000];
-        var built = freqs.map(function(f, idx) {
-            var filter = ctx.createBiquadFilter();
-            filter.type = idx === 0 ? 'lowshelf' : (idx === 4 ? 'highshelf' : 'peaking');
-            filter.frequency.value = f;
-            filter.Q.value = 1.0;
-            filter.gain.value = S.eqBands ? S.eqBands[idx] : 0;
-            return filter;
-        });
-        var node = src;
-        built.forEach(function(fl) { node.connect(fl); node = fl; });
-        last = node; filters = built;
-    } catch(e) { filters = []; last = src; try { src.disconnect(); } catch(e3) {} last = src; }
-    try { last.connect(ctx.destination); } catch(e) { try { src.connect(ctx.destination); } catch(e4) {} }
+        var bass = ctx.createBiquadFilter(); bass.type = 'lowshelf'; bass.frequency.value = 150; bass.gain.value = S.eq.bass;
+        var mid = ctx.createBiquadFilter(); mid.type = 'peaking'; mid.frequency.value = 1000; mid.Q.value = 1; mid.gain.value = S.eq.mid;
+        var treble = ctx.createBiquadFilter(); treble.type = 'highshelf'; treble.frequency.value = 3500; treble.gain.value = S.eq.treble;
+        var pre = ctx.createGain(); pre.gain.value = Math.max(0, S.vol * S.eq.preamp);
+        var comp = ctx.createDynamicsCompressor();
+        comp.threshold.value = -12; comp.knee.value = 12; comp.ratio.value = 4; comp.attack.value = 0.003; comp.release.value = 0.25;
+        src.connect(bass); bass.connect(mid); mid.connect(treble); treble.connect(pre); pre.connect(comp); comp.connect(ctx.destination);
+        eqNodes = { bass: bass, mid: mid, treble: treble }; preampNode = pre; compNode = comp;
+    } catch(e) {
+        eqNodes = {}; preampNode = null; compNode = null;
+        try { src.disconnect(); } catch(e3) {}
+        try { src.connect(ctx.destination); } catch(e4) {}
+    }
     audioCtx = ctx; sourceNode = src;
     // iOS/Android bisa menangguhkan AudioContext (layar mati, panggilan, tab di latar) -> suara hilang. Pulihkan otomatis.
     try { ctx.onstatechange = function() { if (ctx.state !== 'running' && S.ip && !S._userPaused) resumeAudioCtx(); }; } catch(e) {}
@@ -1010,17 +1081,52 @@ function resumeAudioCtx() {
 document.addEventListener('visibilitychange', function() { if (!document.hidden) resumeAudioCtx(); });
 ['touchstart', 'click', 'keydown'].forEach(function(ev) { document.addEventListener(ev, resumeAudioCtx, { passive: true }); });
 
-function updateEQGain(bandIdx, gainValue) {
-    if (!S.eqBands) S.eqBands = [0, 0, 0, 0, 0];
-    S.eqBands[bandIdx] = parseFloat(gainValue);
-    if (filters && filters[bandIdx]) {
-        try {
-            if (audioCtx && audioCtx.state === 'suspended') {
-                audioCtx.resume();
-            }
-            filters[bandIdx].gain.value = parseFloat(gainValue);
-        } catch(e) {}
-    }
+function applyEqualizer(bass, mid, treble, preset) {
+    S.eq.bass = bass; S.eq.mid = mid; S.eq.treble = treble; S.eq.preset = preset || 'Custom';
+    try {
+        if (eqNodes.bass) eqNodes.bass.gain.value = bass;
+        if (eqNodes.mid) eqNodes.mid.gain.value = mid;
+        if (eqNodes.treble) eqNodes.treble.gain.value = treble;
+    } catch(e) {}
+    saveEqState();
+}
+
+// Volume 0-150% (di atas 100% memakai penguat dari rantai Equalizer), sama seperti NanzMusify
+function setVolumeLevel(pct) {
+    var v = Math.max(0, Math.min(1.5, (parseFloat(pct) || 0) / 100));
+    if (!audioCtx || !preampNode) v = Math.min(1, v);
+    S.vol = v;
+    if (v > 0) S.lastVol = v;
+    try { AU.volume = Math.min(1, v); } catch(e) {}
+    try {
+        if (preampNode && audioCtx) preampNode.gain.setTargetAtTime(Math.max(0, v * S.eq.preamp), audioCtx.currentTime, 0.05);
+    } catch(e) { try { preampNode.gain.value = Math.max(0, v * S.eq.preamp); } catch(e2) {} }
+    try { localStorage.setItem('beatsify_volume', String(v)); } catch(e) {}
+    updateVolumeUI();
+}
+function toggleMuteVolume() {
+    if (S.vol > 0) { S.lastVol = S.vol; setVolumeLevel(0); }
+    else setVolumeLevel((S.lastVol || 1) * 100);
+}
+function updateVolumeUI() {
+    var pct = Math.round(S.vol * 100);
+    var fill = gid('eq-vol-fill'); if (fill) fill.style.width = Math.min(100, (pct / 150) * 100) + '%';
+    var lbl = gid('eq-vol-pct'); if (lbl) lbl.textContent = pct + '%';
+    var inp = gid('eq-vol-input'); if (inp && parseFloat(inp.value) !== pct) inp.value = pct;
+    var ic = gid('eq-vol-icon'); if (ic) ic.innerHTML = volIconSvg(S.vol === 0);
+}
+function volIconSvg(muted) {
+    return '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4V5z"/>' +
+        (muted ? '<path d="m22 9-6 6M16 9l6 6"/>' : '<path d="M15.5 8.5a5 5 0 0 1 0 7M19 5a10 10 0 0 1 0 14"/>') + '</svg>';
+}
+
+function setPreampBoost(f) {
+    f = Math.max(1, Math.min(2.5, f));
+    S.eq.preamp = f;
+    try {
+        if (preampNode && audioCtx) preampNode.gain.setTargetAtTime(Math.max(0, S.vol * f), audioCtx.currentTime, 0.05);
+    } catch(e) { try { preampNode.gain.value = Math.max(0, S.vol * f); } catch(e2) {} }
+    saveEqState();
 }
 
 function handleTrackEnded() {
@@ -1230,10 +1336,8 @@ function closePlaybackSpeed() {
 
 function openEqualizer() {
     if (document.getElementById('equalizer-popup')) return;
-    if (!S.eqBands) S.eqBands = [0, 0, 0, 0, 0];
-    if (!S.activePreset) S.activePreset = 'Normal';
     var hadAudioCtx = !!audioCtx;
-    setupWebAudioEQ();
+    if (!S.eqUnsupported) setupWebAudioEQ();
     if (!hadAudioCtx && audioCtx && S.ct && AU.src) {
         resumeAudioCtx();
         var wasPlaying = !AU.paused;
@@ -1244,49 +1348,65 @@ function openEqualizer() {
     }
     var popup = document.createElement('div');
     popup.id = 'equalizer-popup';
-    popup.className = 'fixed inset-0 z-[300] flex items-end justify-center bg-black/60';
-    popup.onclick = function(e) { if(e.target === popup) closeEqualizer(); };
-    var bandsList = ['Bass', 'Low-Mid', 'Mid', 'High-Mid', 'Treble'];
-    var slidersHtml = bandsList.map(function(b, idx) {
-        var val = S.eqBands[idx];
-        return '<div class="flex flex-col items-center flex-1 gap-2">' +
-            '<span id="eq-val-label-' + idx + '" class="text-[10px] text-[#6b7280] font-mono">' + (val > 0 ? '+' : '') + Math.round(val) + 'dB</span>' +
-            '<input type="range" min="-12" max="12" step="0.5" value="' + val + '" ' +
-                'class="eq-slider h-32" style="writing-mode: vertical-lr; direction: rtl; -webkit-appearance: slider-vertical; width: 12px;" ' +
-                'oninput="changeSlider(' + idx + ', this.value)" />' +
-            '<span class="text-xs text-[#a0a5b0] font-medium">' + b + '</span>' +
-        '</div>';
+    popup.className = 'fixed inset-0 z-[300] flex items-center justify-center p-4 bg-black/70';
+    popup.style.backdropFilter = 'blur(4px)';
+    popup.onclick = function(e) { if (e.target === popup) closeEqualizer(); };
+    popup.innerHTML = '<div id="eq-card" onclick="event.stopPropagation()" class="glass-strong rounded-3xl p-6 max-w-sm w-full space-y-5 border border-white/10" style="background: var(--bg-color); animation: slideUp 0.3s ease-out forwards;"></div>';
+    document.body.appendChild(popup);
+    renderEqualizer();
+}
+
+function renderEqualizer() {
+    var card = gid('eq-card'); if (!card) return;
+    var e = S.eq;
+    var presetsHtml = Object.keys(EQ_PRESETS).map(function(p) {
+        var act = e.preset === p;
+        return '<button type="button" onclick="setEqPreset(\'' + p + '\')" class="px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ' +
+            (act ? 'bg-white text-black font-bold shadow-md' : 'bg-white/10 text-white/70 hover:text-white') + '">' + p + '</button>';
     }).join('');
-    var presets = ['Normal', 'Bass Booster', 'Vocal Booster', 'Electronic', 'Acoustic'];
-    var presetsHtml = presets.map(function(p) {
-        var act = S.activePreset === p;
-        var btnStyle = act ? 'bg-[#cfd3d8]/20 text-white font-bold' : 'hover:bg-white/5 text-[#a0a5b0]';
-        return '<button onclick="applyPreset(\'' + p + '\')" class="px-3.5 py-1.5 rounded-full text-xs transition-all ' + btnStyle + '">' + p + '</button>';
+    var boosts = [{ l: 'Normal 1.0x', v: 1.0 }, { l: 'Loud 1.8x', v: 1.8 }, { l: 'Max 2.5x', v: 2.5 }];
+    var boostHtml = boosts.map(function(b) {
+        var act = Math.abs(e.preamp - b.v) < 0.1;
+        return '<button type="button" onclick="setEqBoost(' + b.v + ')" class="py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ' +
+            (act ? 'bg-white text-black font-bold shadow-md' : 'bg-white/10 text-white/70 hover:text-white') + '">' + b.l + '</button>';
     }).join('');
-    popup.innerHTML = '<div class="w-full max-w-md rounded-t-3xl p-6 border-t border-[#333333] glass-strong" style="animation:slideUp 0.3s ease-out forwards; background: var(--bg-color);">' +
-        '<div class="w-10 h-1 bg-white/20 rounded-full mx-auto mb-4"></div>' +
-        '<div class="flex justify-between items-center mb-4">' +
-            '<div>' +
-                '<h3 class="font-black text-white text-lg">Equalizer</h3>' +
-                '<p class="text-[#6b7280] text-xs">Atur frekuensi suara sesuai selera</p>' +
-            '</div>' +
-            '<div id="visualizer-container" class="flex items-end gap-1 h-8 px-3 py-1 rounded-xl bg-white/5 shadow-inner" style="box-shadow: var(--nm-shadow-inset-sm);">' +
-                '<div class="eq-bar"></div>' +
-                '<div class="eq-bar"></div>' +
-                '<div class="eq-bar"></div>' +
-                '<div class="eq-bar"></div>' +
-                '<div class="eq-bar"></div>' +
-                '<div class="eq-bar"></div>' +
-                '<div class="eq-bar"></div>' +
-                '<div class="eq-bar"></div>' +
+    var bands = [['bass', 'Bass'], ['mid', 'Mid'], ['treble', 'Treble']];
+    var slidersHtml = bands.map(function(b) {
+        return '<div><div class="h-28 flex items-center justify-center mb-2">' +
+            '<input type="range" min="-10" max="10" step="1" value="' + e[b[0]] + '" class="eq-slider" ' +
+            'style="writing-mode: vertical-lr; direction: rtl; -webkit-appearance: slider-vertical; width: 12px; height: 110px;" ' +
+            'oninput="changeEqBand(\'' + b[0] + '\', this.value)" /></div>' +
+            '<p class="text-xs font-bold text-white">' + b[1] + '</p>' +
+            '<p id="eq-val-' + b[0] + '" class="text-[10px] text-white/50">' + e[b[0]] + ' dB</p></div>';
+    }).join('');
+    card.innerHTML =
+        '<div class="flex items-center justify-between border-b border-white/10 pb-3">' +
+            '<h3 class="font-bold text-white text-base">Equalizer &amp; Audio Boost</h3>' +
+            '<button type="button" onclick="closeEqualizer()" class="text-white/60 hover:text-white text-xs px-2.5 py-1 rounded-full bg-white/5 cursor-pointer">Tutup</button>' +
+        '</div>' +
+        '<div class="bg-white/5 p-3 rounded-2xl border border-white/10">' +
+            '<div class="flex items-center justify-between mb-2"><span class="text-xs text-white/90 font-bold">Volume</span><span class="text-[10px] text-white/50">Maks 150%</span></div>' +
+            '<div class="flex items-center gap-3">' +
+                '<button type="button" id="eq-vol-icon" onclick="toggleMuteVolume()" aria-label="Bisukan / nyalakan suara" class="text-white/70 hover:text-white transition cursor-pointer p-1 rounded-full active:scale-90 shrink-0" style="background:none;border:0;color:inherit">' + volIconSvg(S.vol === 0) + '</button>' +
+                '<div class="relative flex-1 h-1.5 bg-white/20 rounded-full flex items-center cursor-pointer" style="height:6px;border-radius:999px;background:rgba(255,255,255,.2);position:relative;flex:1">' +
+                    '<input id="eq-vol-input" type="range" min="0" max="150" value="' + Math.round(S.vol * 100) + '" aria-label="Tingkat volume (maks 150%)" oninput="setVolumeLevel(this.value)" style="position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;margin:0;z-index:2" />' +
+                    '<div id="eq-vol-fill" style="height:100%;border-radius:999px;background:#fff;width:' + Math.min(100, Math.round(S.vol * 100) / 150 * 100) + '%"></div>' +
+                '</div>' +
+                '<span id="eq-vol-pct" class="text-xs text-white/90 font-mono font-semibold w-10 text-right shrink-0">' + Math.round(S.vol * 100) + '%</span>' +
             '</div>' +
         '</div>' +
-        '<div id="eq-presets-container" class="flex gap-2 overflow-x-auto hide-scrollbar pb-3 mb-6">' + presetsHtml + '</div>' +
-        '<div class="flex items-center justify-around mb-8 h-48">' + slidersHtml + '</div>' +
-        '<button onclick="closeEqualizer()" class="w-full btn-chrome py-3.5 font-bold rounded-full">Selesai</button>' +
-    '</div>';
-    document.body.appendChild(popup);
-    lucide.createIcons();
+        '<div class="bg-white/5 p-3 rounded-2xl border border-white/10">' +
+            '<div class="flex items-center justify-between mb-2">' +
+                '<span class="text-xs text-white/90 font-bold flex items-center gap-1.5"><i data-lucide="volume-2" class="w-3.5 h-3.5 text-white"></i><span>Loudness Booster (Preamp)</span></span>' +
+                '<span class="text-[11px] font-mono font-bold text-white bg-white/15 px-2 py-0.5 rounded-full border border-white/10">' + e.preamp + 'x</span>' +
+            '</div>' +
+            '<div class="grid grid-cols-3 gap-1.5">' + boostHtml + '</div>' +
+        '</div>' +
+        '<div><p class="text-xs text-white/60 font-semibold mb-2">Preset Equalizer</p>' +
+            '<div class="flex gap-1.5 overflow-x-auto hide-scrollbar pb-1">' + presetsHtml + '</div></div>' +
+        '<div class="grid grid-cols-3 gap-4 pt-1 text-center">' + slidersHtml + '</div>' +
+        '<button type="button" onclick="closeEqualizer()" class="w-full btn-chrome py-2.5 rounded-xl font-bold text-xs cursor-pointer">Selesai</button>';
+    if (typeof lucide !== 'undefined' && lucide.createIcons) lucide.createIcons();
 }
 
 function closeEqualizer() {
@@ -1294,46 +1414,26 @@ function closeEqualizer() {
     if (el) el.remove();
 }
 
-function changeSlider(bandIdx, val) {
-    if (!S.eqBands) S.eqBands = [0, 0, 0, 0, 0];
-    var floatVal = parseFloat(val);
-    S.eqBands[bandIdx] = floatVal;
-    S.activePreset = 'Custom';
-    var label = gid('eq-val-label-' + bandIdx);
-    if (label) {
-        label.innerText = (floatVal > 0 ? '+' : '') + Math.round(floatVal) + 'dB';
-    }
-    var pc = gid('eq-presets-container');
-    if (pc) {
-        var buttons = pc.querySelectorAll('button');
-        buttons.forEach(function(btn) {
-            btn.className = 'px-3.5 py-1.5 rounded-full text-xs transition-all hover:bg-white/5 text-[#a0a5b0]';
-        });
-    }
-    updateEQGain(bandIdx, floatVal);
+function changeEqBand(band, val) {
+    var v = parseFloat(val); if (isNaN(v)) return;
+    var e = S.eq;
+    applyEqualizer(band === 'bass' ? v : e.bass, band === 'mid' ? v : e.mid, band === 'treble' ? v : e.treble, 'Custom');
+    var lbl = gid('eq-val-' + band); if (lbl) lbl.textContent = v + ' dB';
+    var card = gid('eq-card');
+    if (card) card.querySelectorAll('button').forEach(function(b) {
+        if (EQ_PRESETS[b.textContent]) b.className = 'px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap transition-all cursor-pointer bg-white/10 text-white/70 hover:text-white';
+    });
 }
 
-function applyPreset(presetName) {
-    S.activePreset = presetName;
-    if (!S.eqBands) S.eqBands = [0, 0, 0, 0, 0];
-    var mapping = {
-        'Normal': [0, 0, 0, 0, 0],
-        'Bass Booster': [8, 5, 1, 0, -2],
-        'Vocal Booster': [-3, 1, 6, 4, 1],
-        'Electronic': [5, 3, -1, 2, 4],
-        'Acoustic': [3, 1, 2, 3, 2]
-    };
-    var values = mapping[presetName] || [0, 0, 0, 0, 0];
-    values.forEach(function(v, idx) {
-        S.eqBands[idx] = v;
-        updateEQGain(idx, v);
-    });
-    var pop = gid('equalizer-popup');
-    if (pop) {
-        pop.remove();
-        openEqualizer();
-    }
-    showToast('Equalizer: ' + presetName);
+function setEqPreset(name) {
+    var v = EQ_PRESETS[name] || EQ_PRESETS.Normal;
+    applyEqualizer(v[0], v[1], v[2], EQ_PRESETS[name] ? name : 'Normal');
+    renderEqualizer();
+}
+
+function setEqBoost(f) {
+    setPreampBoost(f);
+    renderEqualizer();
 }
 
 function openShareCard() {
