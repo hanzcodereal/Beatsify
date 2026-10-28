@@ -1,6 +1,20 @@
 // Menampilkan daftar "Informasi" (pengumuman) yang datanya diambil dari Supabase,
 // dikelola oleh admin lewat halaman /admin.
 var Info = {
+    SEEN_KEY: 'beatsify_info_seen',
+    _getSeen() { try { return localStorage.getItem(Info.SEEN_KEY) || ''; } catch (e) { return ''; } },
+    _setSeen(v) { try { if (v) localStorage.setItem(Info.SEEN_KEY, v); } catch (e) {} },
+    _dot(on) { var d = gid('info-dot'); if (d) d.style.display = on ? 'block' : 'none'; },
+    // Titik merah muncul jika ada informasi yang lebih baru dari yang terakhir dilihat.
+    async checkNew() {
+        try {
+            if (!window.sb) return;
+            var { data, error } = await sb.from('app_info').select('created_at').order('created_at', { ascending: false }).limit(1);
+            if (error || !data || !data.length) { Info._dot(false); return; }
+            Info._dot(String(data[0].created_at) !== Info._getSeen());
+        } catch (e) {}
+    },
+
     async open() {
         var existing = gid('info-modal');
         if (existing) existing.remove();
@@ -23,6 +37,7 @@ var Info = {
             var body = gid('info-list-body');
             if (!body) return;
             if (error) { body.innerHTML = '<p class="text-white/50 text-sm text-center py-6">Gagal memuat informasi.</p>'; return; }
+            if (data && data.length) { Info._setSeen(String(data[0].created_at)); Info._dot(false); }
             if (!data || data.length === 0) { body.innerHTML = '<p class="text-white/50 text-sm text-center py-6">Belum ada informasi.</p>'; return; }
             body.innerHTML = data.map(function (item) {
                 var d = item.created_at ? new Date(item.created_at) : null;

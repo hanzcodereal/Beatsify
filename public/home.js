@@ -49,8 +49,9 @@ var Home = {
                     <h1 class="text-2xl md:text-3xl font-black chrome-text">Beatsify</h1>
                 </div>
                 <div class="flex items-center gap-2">
-                    <button onclick="Info.open()" class="glass glass-hover rounded-full p-2.5 text-[#b3b3b3] hover:text-white active:scale-90 transition-all" title="Informasi">
+                    <button onclick="Info.open()" class="relative glass glass-hover rounded-full p-2.5 text-[#b3b3b3] hover:text-white active:scale-90 transition-all" title="Informasi" style="position:relative">
                         <i data-lucide="megaphone" class="w-4 h-4"></i>
+                        <span id="info-dot" style="display:none;position:absolute;top:2px;right:2px;width:10px;height:10px;border-radius:50%;background:#ef4444;border:2px solid #000;box-sizing:content-box"></span>
                     </button>
                     <button onclick="Home.refresh()" class="glass glass-hover rounded-full p-2.5 text-[#b3b3b3] hover:text-white active:scale-90 transition-all" title="Muat Ulang">
                         <i data-lucide="refresh-cw" class="w-4 h-4"></i>
@@ -107,6 +108,7 @@ var Home = {
 
         lucide.createIcons();
         Home.updateGreeting();
+        if (typeof Info !== 'undefined' && Info.checkNew) Info.checkNew();
 
         if (Home.activeCategory && Home.activeCategory !== 'Semua') {
             Home.displayCategoryView();
@@ -301,7 +303,7 @@ var Home = {
             <div>
                 <h2 class="text-base font-bold mb-3 flex items-center gap-2">
                     <span class="w-1.5 h-4 bg-white/90 rounded-full inline-block"></span>
-                    <span class="chrome-text">Trending di Indonesia</span>
+                    <span class="chrome-text">Lagu Populer - ${es(catName)}</span>
                 </h2>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-3">${songsHtml}</div>
             </div>
@@ -309,7 +311,7 @@ var Home = {
             ${plistHtml ? `<div>
                 <h2 class="text-base font-bold mb-3 flex items-center gap-2">
                     <span class="w-1.5 h-4 bg-white/90 rounded-full inline-block"></span>
-                    <span class="chrome-text">Hits & Playlist Indonesia</span>
+                    <span class="chrome-text">Playlist & Album ${es(catName)}</span>
                 </h2>
                 <div class="flex gap-3 overflow-x-auto hide-scrollbar pb-3">${plistHtml}</div>
             </div>` : ''}
