@@ -1,14 +1,46 @@
 {
   "version": 2,
   "rewrites": [
-    { "source": "/api/admin-login", "destination": "/api/admin?action=login" },
-    { "source": "/api/admin-stats", "destination": "/api/admin?action=stats" },
-    { "source": "/api/admin-users", "destination": "/api/admin?action=users" },
-    { "source": "/api/admin-info", "destination": "/api/admin?action=info" },
-    { "source": "/admin", "destination": "/admin.html" },
-    { "source": "/play/:id*", "destination": "/index.html" },
-    { "source": "/search/:q*", "destination": "/index.html" },
-    { "source": "/album/:id*", "destination": "/index.html" },
-    { "source": "/artist/:id*", "destination": "/index.html" }
-  ]
+    {
+      "source": "/api/admin-login",
+      "destination": "/api/admin?action=login"
+    },
+    {
+      "source": "/api/admin-stats",
+      "destination": "/api/admin?action=stats"
+    },
+    {
+      "source": "/api/admin-users",
+      "destination": "/api/admin?action=users"
+    },
+    {
+      "source": "/api/admin-info",
+      "destination": "/api/admin?action=info"
+    },
+    {
+      "source": "/admin",
+      "destination": "/admin.html"
+    },
+    {
+      "source": "/play/:id*",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/search/:q*",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/album/:id*",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/artist/:id*",
+      "destination": "/index.html"
+    }
+  ],
+  "functions": {
+    "api/proxy-audio.js": {
+      "maxDuration": 60
+    }
+  }
 }
