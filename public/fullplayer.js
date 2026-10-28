@@ -276,9 +276,9 @@ var FullPlayer={
                     <i data-lucide="skip-forward" class="w-5 h-5 ${S.autoNext ? 'text-rose-400' : 'text-white'}"></i>
                     <span class="text-xs font-semibold ${S.autoNext ? 'text-rose-400' : 'text-white/90'}">Auto Next</span>
                 </button>
-                <button onclick="gid('full-more-sheet').remove();openEqualizer();" class="flex flex-col items-center gap-1.5 p-3 rounded-2xl bg-white/5 hover:bg-white/10 active:scale-95 transition cursor-pointer">
-                    <i data-lucide="sliders" class="w-5 h-5 text-white"></i>
-                    <span class="text-xs font-semibold text-white/90">Equalizer</span>
+                <button onclick="gid('full-more-sheet').remove();openVolume();" class="flex flex-col items-center gap-1.5 p-3 rounded-2xl bg-white/5 hover:bg-white/10 active:scale-95 transition cursor-pointer">
+                    <i data-lucide="volume-2" class="w-5 h-5 text-white"></i>
+                    <span class="text-xs font-semibold text-white/90">Volume</span>
                 </button>
                 <button onclick="gid('full-more-sheet').remove();openSleepTimer();" class="flex flex-col items-center gap-1.5 p-3 rounded-2xl bg-white/5 hover:bg-white/10 active:scale-95 transition cursor-pointer">
                     <i data-lucide="clock" class="w-5 h-5 text-white"></i>
